@@ -42,4 +42,13 @@ $code = $oauth->user_request([
 ]);
 
 $creds = $oauth->extract_params($oauth->response['response']);
-var_dump($creds);
+//var_dump($creds);
+
+$metadata = new Rezzza\Flickr\Metadata('3365341effaf533f4fe95f6629a2c9a8', '9c21dac1df1c16a3');
+$metadata->setOauthAccess($creds['oauth_token'], $creds['oauth_token_secret']);
+
+$factory  = new Rezzza\Flickr\ApiFactory($metadata, new Rezzza\Flickr\Http\GuzzleAdapter());
+
+$setsList = $factory->call('flickr.photosets.getList');
+
+var_dump($setsList);
