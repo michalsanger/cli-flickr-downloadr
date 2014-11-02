@@ -45,7 +45,7 @@ $accessCode = $oauth->user_request([
     'url' => 'https://www.flickr.com/services/oauth/access_token',
     'params' => [
         'oauth_verifier' => $pinCode,
-        'oauth_token' => $creds['oauth_token'],
+        'oauth_token' => $requestCreds['oauth_token'],
     ],
 ]);
 
