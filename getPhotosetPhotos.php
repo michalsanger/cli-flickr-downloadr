@@ -17,8 +17,15 @@ $params = [
 $xml = $factory->call('flickr.photosets.getPhotos', $params);
 $photos = $xml->photoset->photo;
 /* @var $photos SimpleXMLElement[] */
+$i = 1;
 foreach ($photos as $photo) {
     //var_dump($photo);
-    echo $photo->attributes()->id . '; ' . $photo->attributes()->title . PHP_EOL;
-    echo $photo->attributes()->url_o . PHP_EOL . PHP_EOL;
+    $title = $photo->attributes()->title;
+    $id = $photo->attributes()->id;
+    $urlOriginal = $photo->attributes()->url_o;
+    echo $id . '; ' . $title . PHP_EOL;
+    $pos = str_pad($i, 3, '0', STR_PAD_LEFT);
+    $filename = $pos . '-' . $title . '-' . $id . '.' . $photo->attributes()->originalformat;
+    file_put_contents($filename, fopen($urlOriginal, 'r'));
+    $i++;
 }
