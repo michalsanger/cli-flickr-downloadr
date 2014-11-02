@@ -1,5 +1,11 @@
 <?php
 
+if (count($_SERVER['argv']) < 2) {
+    die('Photoset ID required!' . PHP_EOL);
+}
+
+$photosetId = $_SERVER['argv'][1];
+
 require_once './vendor/autoload.php';
 
 $neonDecoder = new \Nette\Neon\Decoder();
@@ -11,7 +17,7 @@ $metadata->setOauthAccess($config['oauth']['token'], $config['oauth']['tokenSecr
 $factory  = new Rezzza\Flickr\ApiFactory($metadata, new Rezzza\Flickr\Http\GuzzleAdapter());
 
 $params = [
-    'photoset_id' => "72157646966473272", 
+    'photoset_id' => $photosetId, 
     'extras' => 'url_o,media,original_format'
 ];
 $xml = $factory->call('flickr.photosets.getPhotos', $params);
