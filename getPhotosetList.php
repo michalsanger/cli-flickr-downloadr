@@ -14,5 +14,5 @@ $xml = $factory->call('flickr.photosets.getList');
 $sets = $xml->photosets->photoset;
 /* @var $sets SimpleXMLElement[] */
 foreach ($sets as $set) {
-    echo (string)$set->title . PHP_EOL;
+    echo $set->attributes()->id . '; ' . $set->title . PHP_EOL;
 }
