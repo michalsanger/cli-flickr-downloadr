@@ -5,12 +5,20 @@
 
 require_once './vendor/autoload.php';
 
+$confFilename = '.flickrDownloadr';
+$conf = [
+    'oauth' => [
+        'key' => '3365341effaf533f4fe95f6629a2c9a8',
+        'secret' => '9c21dac1df1c16a3',
+    ]
+];
+
 $oauth = new tmhOAuth([
-    'consumer_key' => '3365341effaf533f4fe95f6629a2c9a8',
-    'consumer_secret' => '9c21dac1df1c16a3',
+    'consumer_key' => $conf['oauth']['key'],
+    'consumer_secret' => $conf['oauth']['secret'],
 ]);
 
-$code = $oauth->apponly_request([
+$requestCode = $oauth->apponly_request([
     'without_bearer' => true,
     'method' => 'POST',
     'url' => 'https://www.flickr.com/services/oauth/request_token',
@@ -19,12 +27,12 @@ $code = $oauth->apponly_request([
     ]
 ]);
 
-$creds = $oauth->extract_params($oauth->response['response']);
-$oauth->config['user_token'] = $creds['oauth_token'];
-$oauth->config['user_secret'] = $creds['oauth_token_secret'];
+$requestCreds = $oauth->extract_params($oauth->response['response']);
+$oauth->config['user_token'] = $requestCreds['oauth_token'];
+$oauth->config['user_secret'] = $requestCreds['oauth_token_secret'];
 
-echo 'Copy and paste this URL into your web browser and follower the prompts to get a pin code.' . "\n";
-$authUrl = 'https://www.flickr.com/services/oauth/authorize?oauth_token=' . $creds['oauth_token'] . '&perms=read';
+echo 'Copy and paste this URL into your web browser and follow the prompts to get a pin code.' . "\n";
+$authUrl = 'https://www.flickr.com/services/oauth/authorize?oauth_token=' . $requestCreds['oauth_token'] . '&perms=read';
 echo $authUrl . "\n";
 
 echo 'What was the Pin Code?: ';
@@ -32,7 +40,7 @@ $handle = fopen("php://stdin","r");
 $data = fgets($handle);
 $pinCode = trim($data);
 
-$code = $oauth->user_request([
+$accessCode = $oauth->user_request([
     'method' => 'POST',
     'url' => 'https://www.flickr.com/services/oauth/access_token',
     'params' => [
@@ -41,14 +49,15 @@ $code = $oauth->user_request([
     ],
 ]);
 
-$creds = $oauth->extract_params($oauth->response['response']);
-//var_dump($creds);
+$accessCreds = $oauth->extract_params($oauth->response['response']);
 
-$metadata = new Rezzza\Flickr\Metadata('3365341effaf533f4fe95f6629a2c9a8', '9c21dac1df1c16a3');
-$metadata->setOauthAccess($creds['oauth_token'], $creds['oauth_token_secret']);
+$conf['oauth']['token'] = $accessCreds['oauth_token'];
+$conf['oauth']['tokenSecret'] = $accessCreds['oauth_token_secret'];
 
-$factory  = new Rezzza\Flickr\ApiFactory($metadata, new Rezzza\Flickr\Http\GuzzleAdapter());
-
-$setsList = $factory->call('flickr.photosets.getList');
-
-var_dump($setsList);
+$neonEncoder = new \Nette\Neon\Encoder();
+$confEncoded = $neonEncoder->encode($conf, 1);
+if (file_put_contents($confFilename, $confEncoded) !== FALSE) {
+    echo 'Authorization OK, credentials saved into ' . $confFilename . PHP_EOL;
+} else {
+    echo 'Error saving into file';
+}

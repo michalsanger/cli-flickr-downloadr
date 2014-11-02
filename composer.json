@@ -2,7 +2,8 @@
     "require": {
         "themattharris/tmhoauth": "0.8.*",
         "rezzza/flickr": "1.1.*@dev",
-        "guzzle/http": "*",
-        "guzzle/guzzle": "*"
+        "guzzle/guzzle": "3.9.*",
+        "guzzle/http": "3.9.*",
+        "nette/neon": "2.2.*"
     }
 }
