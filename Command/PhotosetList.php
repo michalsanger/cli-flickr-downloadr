@@ -25,7 +25,7 @@ class PhotosetList extends Command
     {
         $this->flickrApi = $this->getFlickrApi();
         $sets = $this->getPhotosets();
-        $output->writeln('<info>Number of photosets: ' . count($sets) . '<info>');
+        $output->writeln('<info>Number of photosets: ' . count($sets) . '</info>');
         foreach ($sets as $set) {
             $output->writeln($set->attributes()->id . '; ' . $set->title);
         }

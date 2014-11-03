@@ -32,7 +32,7 @@ class PhotosetDownload extends Command
         $id = $input->getArgument('id');
         $this->flickrApi = $this->getFlickrApi();
         $photos = $this->getPhotoList($id);
-        $output->writeln('<info>Number of photos in set: ' . count($photos) . '<info>');
+        $output->writeln('<info>Number of photos in set: ' . count($photos) . '</info>');
         $i = 1;
         foreach ($photos as $photo) {
             $filename = $this->getPhotoFilename($photo, $i);
