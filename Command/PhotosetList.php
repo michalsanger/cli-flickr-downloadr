@@ -3,6 +3,7 @@
 namespace FlickrDownloadr\Command;
 
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputInterface;
@@ -41,9 +42,13 @@ class PhotosetList extends Command
         $this->flickrApi = $this->getFlickrApi();
         $sets = $this->getPhotosets($input);
         $output->writeln('<info>Number of photosets: ' . count($sets) . '</info>');
+
+        $table = new Table($output);
+        $table->setHeaders(array('ID', 'Title', 'Photos'));
         foreach ($sets as $set) {
-            $output->writeln($set->attributes()->id . '; ' . $set->title);
+            $table->addRow(array($set->attributes()->id, $set->title, $set->attributes()->photos));
         }
+        $table->render();
     }
     
     /**
