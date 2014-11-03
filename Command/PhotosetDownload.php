@@ -47,7 +47,7 @@ class PhotosetDownload extends Command
      */
     private function getFlickrApi()
     {
-        $configFilename = dirname(__DIR__) . '/.flickrDownloadr';
+        $configFilename = $_SERVER['HOME'] . '/.flickrDownloadr';
         if (!is_readable($configFilename)) {
             throw new \RuntimeException('Config file missing or not readable!');
         }
