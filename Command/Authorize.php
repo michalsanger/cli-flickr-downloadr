@@ -6,6 +6,8 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\Question;
+use Symfony\Component\Console\Formatter\OutputFormatterStyle;
+
 
 class Authorize extends Command
 {
@@ -36,15 +38,15 @@ class Authorize extends Command
     
     private function printWelcome(OutputInterface $output)
     {
-        $msg = <<<EOM
-<info>Flickr Downloadr Authorization
-This script runs the OAuth flow in out-of-band mode. You will need access to
-a web browser to authorise the application. 
-
-At the end of this script credentials will be saved into config file.</info>
-
-EOM;
-        $output->writeln($msg);
+        $output->getFormatter()->setStyle('heading', new OutputFormatterStyle('green', null, array('bold')));
+        $output->getFormatter()->setStyle('bold', new OutputFormatterStyle(null, null, array('bold')));
+        
+        $output->writeln('<heading>Flickr Downloadr Authorization</heading>');
+        $output->writeln('<info>This script runs the OAuth flow in out-of-band mode. You will need access to</info>');
+        $output->writeln('<info>a web browser to authorise the application.</info>');
+        $output->writeln('');
+        $output->writeln('<info>At the end of this script credentials will be saved into config file.</info>');
+        $output->writeln('');
     }
 
     /**
@@ -83,12 +85,12 @@ EOM;
     
     private function getPinCode(InputInterface $input, OutputInterface $output)
     {
-        $output->writeln('<info>Copy and paste this URL into your web browser and follow the prompts to get a pin code.</info>');
+        $output->writeln('<info>Copy and paste this URL into your web browser and follow the prompts to get a pin code:</info>');
         $authUrl = 'https://www.flickr.com/services/oauth/authorize?oauth_token=' . $this->oauthClient->config['user_token'] . '&perms=read';
-        $output->writeln($authUrl);
+        $output->writeln('<bold>' . $authUrl . '</bold>');
         
         $helper = $this->getHelper('question');
-        $question = new Question('<question>What was the Pin Code?</question>: ');
+        $question = new Question('<heading>What was the Pin Code?</heading>: ');
         $pinCode = $helper->ask($input, $output, $question);
         return $pinCode;
     }
@@ -135,5 +137,6 @@ EOM;
         }
         $output->writeln('<info>Authorization OK, credentials saved into:</info>');
         $output->writeln($confFilename);
+        $output->writeln('');
     }
 }
