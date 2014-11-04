@@ -36,8 +36,12 @@ class PhotosetDownload extends Command
         $i = 1;
         foreach ($photos as $photo) {
             $filename = $this->getPhotoFilename($photo, $i);
-            $output->writeln($filename);
-            $this->downloadPhoto($photo, $filename);
+            $output->write($filename . ' ');
+            $size = $this->downloadPhoto($photo, $filename);
+            if ($size === FALSE) {
+                $output->writeln('<error>Error!</error>');
+            }
+            $output->writeln('<comment>(' . $this->formatFilesize($size) . ')</comment>');
             $i++;
         }
     }
@@ -100,5 +104,24 @@ class PhotosetDownload extends Command
     {
         $urlOriginal = $photo->attributes()->url_o;
         return file_put_contents($filename, fopen($urlOriginal, 'r'));
+    }
+    
+    /**
+     * Converts to human readable file size.
+     * @param  int
+     * @param  int
+     * @return string
+     */
+    private function formatFilesize($bytes, $precision = 2)
+    {
+        $bytes = round($bytes);
+        $units = array('B', 'kB', 'MB', 'GB', 'TB', 'PB');
+        foreach ($units as $unit) {
+            if (abs($bytes) < 1024 || $unit === end($units)) {
+                break;
+            }
+            $bytes = $bytes / 1024;
+        }
+        return round($bytes, $precision) . ' ' . $unit;
     }
 }
