@@ -2,9 +2,11 @@
 
 namespace FlickrDownloadr\Command;
 
+use Nette\Utils\Strings;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class PhotosetDownload extends Command
@@ -23,6 +25,12 @@ class PhotosetDownload extends Command
                 'id',
                 InputArgument::REQUIRED,
                 'ID of the photoset'
+            )
+            ->addOption(
+                'no-slug',
+                null,
+                InputOption::VALUE_NONE,
+                'Do not convert filename to safe string'
             );
         ;
     }
@@ -30,12 +38,13 @@ class PhotosetDownload extends Command
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $id = $input->getArgument('id');
+        $noSlug = $input->getOption('no-slug');
         $this->flickrApi = $this->getFlickrApi();
         $photos = $this->getPhotoList($id);
         $output->writeln('<info>Number of photos in set: ' . count($photos) . '</info>');
         $i = 1;
         foreach ($photos as $photo) {
-            $filename = $this->getPhotoFilename($photo, $i);
+            $filename = $this->getPhotoFilename($photo, $i, $noSlug);
             $output->write($filename . ' ');
             $size = $this->downloadPhoto($photo, $filename);
             if ($size === FALSE) {
@@ -83,16 +92,21 @@ class PhotosetDownload extends Command
     /**
      * @param \SimpleXMLElement $photo
      * @param intiger $listOrder
+     * @param boolean $noSlug
      * @return string
      */
-    private function getPhotoFilename(\SimpleXMLElement $photo, $listOrder)
+    private function getPhotoFilename(\SimpleXMLElement $photo, $listOrder, $noSlug)
     {
         $pos = str_pad($listOrder, 3, '0', STR_PAD_LEFT);
         $title = $photo->attributes()->title;
         $id = $photo->attributes()->id;
         $extension = $photo->attributes()->originalformat;
-        $filename = $pos . '-' . $title . '-' . $id . '.' . $extension;
-        return $filename;
+        
+        $filename = $pos . '-' . $title . '-' . $id;
+        if (!$noSlug) {
+            $filename = Strings::webalize($filename);
+        }
+        return $filename . '.' . $extension;
     }
     
     /**

@@ -5,6 +5,7 @@
         "guzzle/guzzle": "3.9.*",
         "guzzle/http": "3.9.*",
         "nette/neon": "2.2.*",
+        "nette/utils": "2.2.*",
         "symfony/console": "2.5.*"
     }
 }
