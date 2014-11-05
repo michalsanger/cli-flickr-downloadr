@@ -13,6 +13,10 @@ class Authorize extends Command
 {
     const CONSUMER_KEY = '3365341effaf533f4fe95f6629a2c9a8';
     const CONSUMER_SECRET = '9c21dac1df1c16a3';
+    const URL_REQUEST_TOKEN = 'https://www.flickr.com/services/oauth/request_token';
+    const URL_AUTHORIZE = 'https://www.flickr.com/services/oauth/authorize';
+    const URL_ACCESS_TOKEN = 'https://www.flickr.com/services/oauth/access_token';
+    const AUTHORIZE_PERMS = 'read';
 
     /**
      * @var \tmhOAuth
@@ -66,7 +70,7 @@ class Authorize extends Command
         $code = $this->oauthClient->apponly_request([
             'without_bearer' => true,
             'method' => 'POST',
-            'url' => 'https://www.flickr.com/services/oauth/request_token',
+            'url' => self::URL_REQUEST_TOKEN,
             'params' => [
                 'oauth_callback' => 'oob'
             ]
@@ -86,7 +90,8 @@ class Authorize extends Command
     private function getPinCode(InputInterface $input, OutputInterface $output)
     {
         $output->writeln('<info>Copy and paste this URL into your web browser and follow the prompts to get a pin code:</info>');
-        $authUrl = 'https://www.flickr.com/services/oauth/authorize?oauth_token=' . $this->oauthClient->config['user_token'] . '&perms=read';
+        $urlQuery = http_build_query(['oauth_token' => $this->oauthClient->config['user_token'], 'perms' => self::AUTHORIZE_PERMS]);
+        $authUrl = self::URL_AUTHORIZE . '?' . $urlQuery;
         $output->writeln('<bold>' . $authUrl . '</bold>');
         
         $helper = $this->getHelper('question');
@@ -104,7 +109,7 @@ class Authorize extends Command
     {
         $code = $this->oauthClient->user_request([
             'method' => 'POST',
-            'url' => 'https://www.flickr.com/services/oauth/access_token',
+            'url' => self::URL_ACCESS_TOKEN,
             'params' => [
                 'oauth_verifier' => $pinCode,
                 'oauth_token' => $this->oauthClient->config['user_token'],
