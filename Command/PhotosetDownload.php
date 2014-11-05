@@ -85,6 +85,7 @@ class PhotosetDownload extends Command
             'extras' => 'url_o,media,original_format'
         ];
         $xml = $this->flickrApi->call('flickr.photosets.getPhotos', $params);
+        $this->dieOnErrorResponse($xml);
         $photos = $xml->photoset->photo;
         return $photos;
     }
@@ -137,5 +138,22 @@ class PhotosetDownload extends Command
             $bytes = $bytes / 1024;
         }
         return round($bytes, $precision) . ' ' . $unit;
+    }
+    
+    /**
+     * @param \SimpleXMLElement $xml
+     * @throws \RuntimeException
+     */
+    private function dieOnErrorResponse(\SimpleXMLElement $xml)
+    {
+        // TODO: refactor into API wrapper
+        $xml = (array)$xml;
+        $status = $xml['@attributes']['stat'];
+        if ($status !== 'fail') {
+            return;
+        }
+        $err = (array)$xml['err'];
+        $msg = $err['@attributes']['msg'];
+        throw new \RuntimeException($msg);
     }
 }
