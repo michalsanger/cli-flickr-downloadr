@@ -78,52 +78,56 @@ class PhotosetDownload extends Command
         $metadata = new \Rezzza\Flickr\Metadata($config['oauth']['key'], $config['oauth']['secret']);
         $metadata->setOauthAccess($config['oauth']['token'], $config['oauth']['tokenSecret']);
 
-        $flickrApi = new \Rezzza\Flickr\ApiFactory($metadata, new \Rezzza\Flickr\Http\GuzzleAdapter());
+        $flickrApi = new \Rezzza\Flickr\ApiFactory($metadata, new \FlickrDownloadr\Http\GuzzleJsonAdapter());
         return $flickrApi;
     }
     
     /**
      * @param string $photosetId
-     * @return \SimpleXMLElement[]
+     * @return array
      */
     private function getPhotoList($photosetId)
     {
         $params = [
             'photoset_id' => $photosetId, 
-            'extras' => 'url_o,media,original_format'
+            'extras' => 'url_o,media,original_format',
+            'format' => 'json',
+            'nojsoncallback' => 1,
         ];
-        $xml = $this->flickrApi->call('flickr.photosets.getPhotos', $params);
-        $this->dieOnErrorResponse($xml);
-        $photos = $xml->photoset->photo;
+        $response = $this->flickrApi->call('flickr.photosets.getPhotos', $params);
+        $this->dieOnErrorResponse($response);
+        $photos = $response['photoset']['photo'];
         return $photos;
     }
 
     /**
      * @param string $photosetId
-     * @return \SimpleXMLElement
+     * @return array
      */
     private function getPhotosetInfo($photosetId)
     {
         $params = [
-            'photoset_id' => $photosetId
+            'photoset_id' => $photosetId,
+            'format' => 'json',
+            'nojsoncallback' => 1,
         ];
-        $xml = $this->flickrApi->call('flickr.photosets.getInfo', $params);
-        $this->dieOnErrorResponse($xml);
-        return $xml->photoset;
+        $response = $this->flickrApi->call('flickr.photosets.getInfo', $params);
+        $this->dieOnErrorResponse($response);
+        return $response['photoset'];
     }
     
     /**
-     * @param \SimpleXMLElement $photo
+     * @param array $photo
      * @param intiger $listOrder
      * @param boolean $noSlug
      * @return string
      */
-    private function getPhotoFilename(\SimpleXMLElement $photo, $listOrder, $noSlug)
+    private function getPhotoFilename(array $photo, $listOrder, $noSlug)
     {
         $pos = str_pad($listOrder, 3, '0', STR_PAD_LEFT);
-        $title = $photo->attributes()->title;
-        $id = $photo->attributes()->id;
-        $extension = $photo->attributes()->originalformat;
+        $title = $photo['title'];
+        $id = $photo['id'];
+        $extension = $photo['originalformat'];
         
         $filename = $pos . '-' . $title . '-' . $id;
         if (!$noSlug) {
@@ -134,7 +138,7 @@ class PhotosetDownload extends Command
     
     private function getDirName($photosetInfo, $noSlug)
     {
-        $dirName = current($photosetInfo->title);
+        $dirName = $photosetInfo['title']['_content'];
         if (!$noSlug) {
             $dirName = Strings::webalize($dirName);
         }
@@ -143,14 +147,14 @@ class PhotosetDownload extends Command
 
 
     /**
-     * @param \SimpleXMLElement $photo
+     * @param array $photo
      * @param string $filename
      * @param string $dirName
      * @return int Number of bytes that were written to the file, or FALSE on failure
      */
-    private function downloadPhoto(\SimpleXMLElement $photo, $filename, $dirName)
+    private function downloadPhoto(array $photo, $filename, $dirName)
     {
-        $urlOriginal = $photo->attributes()->url_o;
+        $urlOriginal = $photo['url_o'];
         return file_put_contents($dirName . '/' . $filename, fopen($urlOriginal, 'r'));
     }
     
@@ -174,19 +178,17 @@ class PhotosetDownload extends Command
     }
     
     /**
-     * @param \SimpleXMLElement $xml
+     * @param array $response
      * @throws \RuntimeException
      */
-    private function dieOnErrorResponse(\SimpleXMLElement $xml)
+    private function dieOnErrorResponse(array $response)
     {
         // TODO: refactor into API wrapper
-        $xml = (array)$xml;
-        $status = $xml['@attributes']['stat'];
-        if ($status !== 'fail') {
+        if ($response['stat'] !== 'fail') {
             return;
         }
-        $err = (array)$xml['err'];
-        $msg = $err['@attributes']['msg'];
-        throw new \RuntimeException($msg);
+        $msg = $response['message'];
+        $code = $response['code'];
+        throw new \RuntimeException($msg, $code);
     }
 }

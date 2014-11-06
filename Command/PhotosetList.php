@@ -4,7 +4,6 @@ namespace FlickrDownloadr\Command;
 
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\Table;
-use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -46,7 +45,7 @@ class PhotosetList extends Command
         $table = new Table($output);
         $table->setHeaders(array('ID', 'Title', 'Photos'));
         foreach ($sets as $set) {
-            $table->addRow(array($set->attributes()->id, $set->title, $set->attributes()->photos));
+            $table->addRow(array($set['id'], $set['title']['_content'], $set['photos']));
         }
         $table->render();
     }
@@ -67,13 +66,13 @@ class PhotosetList extends Command
         $metadata = new \Rezzza\Flickr\Metadata($config['oauth']['key'], $config['oauth']['secret']);
         $metadata->setOauthAccess($config['oauth']['token'], $config['oauth']['tokenSecret']);
 
-        $flickrApi = new \Rezzza\Flickr\ApiFactory($metadata, new \Rezzza\Flickr\Http\GuzzleAdapter());
+        $flickrApi = new \Rezzza\Flickr\ApiFactory($metadata, new \FlickrDownloadr\Http\GuzzleJsonAdapter());
         return $flickrApi;
     }
     
     /**
      * @param InputInterface $input
-     * @return \SimpleXMLElement[]
+     * @return Array
      */
     private function getPhotosets(InputInterface $input)
     {
@@ -84,13 +83,15 @@ class PhotosetList extends Command
         $params = array(
             'page' => 1,
             'per_page' => (int)$rows,
+            'format' => 'json',
+            'nojsoncallback' => 1,
         );
         if ($input->getOption('all')) {
             unset($params['per_page']);
         }
 
-        $xml = $this->flickrApi->call('flickr.photosets.getList', $params);
-        $sets = $xml->photosets->photoset;
+        $response = $this->flickrApi->call('flickr.photosets.getList', $params);
+        $sets = $response['photosets']['photoset'];
         return $sets;
     }
 }
