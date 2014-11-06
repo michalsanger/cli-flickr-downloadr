@@ -40,13 +40,20 @@ class PhotosetDownload extends Command
         $id = $input->getArgument('id');
         $noSlug = $input->getOption('no-slug');
         $this->flickrApi = $this->getFlickrApi();
+        
+        $photosetInfo = $this->getPhotosetInfo($id);
+        $dirName = $this->getDirName($photosetInfo, $noSlug);
+        if (!is_dir($dirName)) {
+            \Nette\Utils\FileSystem::createDir($dirName);
+        }
+        
         $photos = $this->getPhotoList($id);
         $output->writeln('<info>Number of photos in set: ' . count($photos) . '</info>');
         $i = 1;
         foreach ($photos as $photo) {
             $filename = $this->getPhotoFilename($photo, $i, $noSlug);
             $output->write($filename . ' ');
-            $size = $this->downloadPhoto($photo, $filename);
+            $size = $this->downloadPhoto($photo, $filename, $dirName);
             if ($size === FALSE) {
                 $output->writeln('<error>Error!</error>');
             } else {
@@ -90,6 +97,20 @@ class PhotosetDownload extends Command
         $photos = $xml->photoset->photo;
         return $photos;
     }
+
+    /**
+     * @param string $photosetId
+     * @return \SimpleXMLElement
+     */
+    private function getPhotosetInfo($photosetId)
+    {
+        $params = [
+            'photoset_id' => $photosetId
+        ];
+        $xml = $this->flickrApi->call('flickr.photosets.getInfo', $params);
+        $this->dieOnErrorResponse($xml);
+        return $xml->photoset;
+    }
     
     /**
      * @param \SimpleXMLElement $photo
@@ -111,15 +132,26 @@ class PhotosetDownload extends Command
         return $filename . '.' . $extension;
     }
     
+    private function getDirName($photosetInfo, $noSlug)
+    {
+        $dirName = current($photosetInfo->title);
+        if (!$noSlug) {
+            $dirName = Strings::webalize($dirName);
+        }
+        return $dirName;
+    }
+
+
     /**
      * @param \SimpleXMLElement $photo
-     * @param type $filename
+     * @param string $filename
+     * @param string $dirName
      * @return int Number of bytes that were written to the file, or FALSE on failure
      */
-    private function downloadPhoto(\SimpleXMLElement $photo, $filename)
+    private function downloadPhoto(\SimpleXMLElement $photo, $filename, $dirName)
     {
         $urlOriginal = $photo->attributes()->url_o;
-        return file_put_contents($filename, fopen($urlOriginal, 'r'));
+        return file_put_contents($dirName . '/' . $filename, fopen($urlOriginal, 'r'));
     }
     
     /**
