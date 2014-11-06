@@ -49,8 +49,9 @@ class PhotosetDownload extends Command
             $size = $this->downloadPhoto($photo, $filename);
             if ($size === FALSE) {
                 $output->writeln('<error>Error!</error>');
+            } else {
+                $output->writeln('<comment>(' . $this->formatFilesize($size) . ')</comment>');
             }
-            $output->writeln('<comment>(' . $this->formatFilesize($size) . ')</comment>');
             $i++;
         }
     }
