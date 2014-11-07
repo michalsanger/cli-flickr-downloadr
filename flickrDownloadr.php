@@ -11,6 +11,10 @@ use Symfony\Component\Console\Application;
 $configurator = new Nette\Configurator();
 $configurator->setTempDirectory('/tmp');
 $configurator->addConfig(__DIR__ . '/config.neon');
+$userConfig = $_SERVER['HOME'] . '/.flickrDownloadr.neon';
+if (is_readable($userConfig)) {
+    $configurator->addConfig($userConfig);
+}
 $container = $configurator->createContainer();
 
 $application = new Application('Flickr Downloadr');

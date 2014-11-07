@@ -1,9 +1,41 @@
+parameters:
+    oauth:
+        key: "3365341effaf533f4fe95f6629a2c9a8"
+        secret: "9c21dac1df1c16a3"
+        token: null
+        tokenSecret: null
+
 services:
     command.photoset.authorize:
         class: FlickrDownloadr\Command\Authorize
+        arguments:
+            - @oauth.client
 
     command.photoset.list:
         class: FlickrDownloadr\Command\PhotosetList
+        arguments:
+            - @flickr.apiFactory
 
     command.photoset.download:
         class: FlickrDownloadr\Command\PhotosetDownload
+        arguments:
+            - @flickr.apiFactory
+
+    flickr.metadata:
+        class: Rezzza\Flickr\Metadata
+        arguments: [%oauth.key%, %oauth.secret%]
+        setup:
+            - setOauthAccess(%oauth.token%, %oauth.tokenSecret%)
+
+    flickr.http.guzzleJsonAdapter:
+        class: FlickrDownloadr\Http\GuzzleJsonAdapter
+
+    flickr.apiFactory:
+        class: Rezzza\Flickr\ApiFactory
+        arguments:
+            - @flickr.metadata
+            - @flickr.http.guzzleJsonAdapter
+
+    oauth.client:
+        class: tmhOAuth
+        arguments: [['consumer_key': %oauth.key%, 'consumer_secret': %oauth.secret%]]

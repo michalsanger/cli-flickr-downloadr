@@ -16,6 +16,12 @@ class PhotosetDownload extends Command
      */
     private $flickrApi;
 
+    function __construct(\Rezzza\Flickr\ApiFactory $flickrApi)
+    {
+        $this->flickrApi = $flickrApi;
+        parent::__construct();
+    }
+    
     protected function configure()
     {
         $this
@@ -39,7 +45,6 @@ class PhotosetDownload extends Command
     {
         $id = $input->getArgument('id');
         $noSlug = $input->getOption('no-slug');
-        $this->flickrApi = $this->getFlickrApi();
         
         $photosetInfo = $this->getPhotosetInfo($id);
         $dirName = $this->getDirName($photosetInfo, $noSlug);
@@ -62,26 +67,7 @@ class PhotosetDownload extends Command
             $i++;
         }
     }
-    
-    /**
-     * @return \Rezzza\Flickr\ApiFactory
-     */
-    private function getFlickrApi()
-    {
-        $configFilename = $_SERVER['HOME'] . '/.flickrDownloadr';
-        if (!is_readable($configFilename)) {
-            throw new \RuntimeException('Config file missing or not readable!');
-        }
-        $neonDecoder = new \Nette\Neon\Decoder();
-        $config = $neonDecoder->decode(file_get_contents($configFilename));
 
-        $metadata = new \Rezzza\Flickr\Metadata($config['oauth']['key'], $config['oauth']['secret']);
-        $metadata->setOauthAccess($config['oauth']['token'], $config['oauth']['tokenSecret']);
-
-        $flickrApi = new \Rezzza\Flickr\ApiFactory($metadata, new \FlickrDownloadr\Http\GuzzleJsonAdapter());
-        return $flickrApi;
-    }
-    
     /**
      * @param string $photosetId
      * @return array

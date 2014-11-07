@@ -22,6 +22,12 @@ class Authorize extends Command
      * @var \tmhOAuth
      */
     private $oauthClient;
+    
+    function __construct(\tmhOAuth $oauthClient)
+    {
+        $this->oauthClient = $oauthClient;
+        parent::__construct();
+    }
 
     protected function configure()
     {
@@ -33,7 +39,6 @@ class Authorize extends Command
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $this->printWelcome($output);
-        $this->oauthClient = $this->getOauthClient();
         $this->getRequestToken();
         $pinCode = $this->getPinCode($input, $output);
         $oauthResponse = $this->getAccessToken($pinCode);
@@ -51,18 +56,6 @@ class Authorize extends Command
         $output->writeln('');
         $output->writeln('<info>At the end of this script credentials will be saved into config file.</info>');
         $output->writeln('');
-    }
-
-    /**
-     * @return \tmhOAuth
-     */
-    private function getOauthClient()
-    {
-        $oauth = new \tmhOAuth([
-            'consumer_key' => self::CONSUMER_KEY,
-            'consumer_secret' => self::CONSUMER_SECRET,
-        ]);
-        return $oauth;
     }
     
     private function getRequestToken()
@@ -125,13 +118,14 @@ class Authorize extends Command
     
     private function saveToConfig(OutputInterface $output, $token, $tokenSecret)
     {
-        $conf = array();
-        $conf['oauth']['key'] = self::CONSUMER_KEY;
-        $conf['oauth']['secret'] = self::CONSUMER_SECRET;
-        $conf['oauth']['token'] = $token;
-        $conf['oauth']['tokenSecret'] = $tokenSecret;
+        $oauth = array();
+        $oauth['key'] = self::CONSUMER_KEY;
+        $oauth['secret'] = self::CONSUMER_SECRET;
+        $oauth['token'] = $token;
+        $oauth['tokenSecret'] = $tokenSecret;
+        $conf = array('parameters' => array('oauth' => $oauth));
         
-        $confFilename = $_SERVER['HOME'] . '/.flickrDownloadr';
+        $confFilename = $_SERVER['HOME'] . '/.flickrDownloadr.neon';
         $neonEncoder = new \Nette\Neon\Encoder();
         $confEncoded = $neonEncoder->encode($conf, 1);
         if (file_put_contents($confFilename, $confEncoded) === FALSE) {
