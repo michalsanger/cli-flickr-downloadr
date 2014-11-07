@@ -14,12 +14,12 @@ services:
     command.photoset.list:
         class: FlickrDownloadr\Command\PhotosetList
         arguments:
-            - @flickr.apiFactory
+            - @flickrApi.client
 
     command.photoset.download:
         class: FlickrDownloadr\Command\PhotosetDownload
         arguments:
-            - @flickr.apiFactory
+            - @flickrApi.client
 
     flickr.metadata:
         class: Rezzza\Flickr\Metadata
@@ -27,14 +27,19 @@ services:
         setup:
             - setOauthAccess(%oauth.token%, %oauth.tokenSecret%)
 
-    flickr.http.guzzleJsonAdapter:
-        class: FlickrDownloadr\Http\GuzzleJsonAdapter
+    flickrApi.guzzleJsonAdapter:
+        class: FlickrDownloadr\FlickrApi\GuzzleJsonAdapter
 
     flickr.apiFactory:
         class: Rezzza\Flickr\ApiFactory
         arguments:
             - @flickr.metadata
-            - @flickr.http.guzzleJsonAdapter
+            - @flickrApi.guzzleJsonAdapter
+
+    flickrApi.client:
+        class: FlickrDownloadr\FlickrApi\Client
+        arguments:
+            - @flickr.apiFactory
 
     oauth.client:
         class: tmhOAuth

@@ -11,11 +11,11 @@ use Symfony\Component\Console\Output\OutputInterface;
 class PhotosetList extends Command
 {
     /**
-     * @var \Rezzza\Flickr\ApiFactory
+     * @var \FlickrDownloadr\FlickrApi\Client
      */
     private $flickrApi;
     
-    function __construct(\Rezzza\Flickr\ApiFactory $flickrApi)
+    function __construct(\FlickrDownloadr\FlickrApi\Client $flickrApi)
     {
         $this->flickrApi = $flickrApi;
         parent::__construct();
@@ -68,8 +68,6 @@ class PhotosetList extends Command
         $params = array(
             'page' => 1,
             'per_page' => (int)$rows,
-            'format' => 'json',
-            'nojsoncallback' => 1,
         );
         if ($input->getOption('all')) {
             unset($params['per_page']);

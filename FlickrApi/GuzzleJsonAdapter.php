@@ -1,8 +1,6 @@
 <?php
 
-namespace FlickrDownloadr\Http;
-
-use Guzzle\Http\Client;
+namespace FlickrDownloadr\FlickrApi;
 
 class GuzzleJsonAdapter implements \Rezzza\Flickr\Http\AdapterInterface
 {
@@ -10,7 +8,7 @@ class GuzzleJsonAdapter implements \Rezzza\Flickr\Http\AdapterInterface
     
     public function __construct()
     {
-        $this->client  = new Client('', array('redirect.disable' => true));
+        $this->client  = new \Guzzle\Http\Client('', array('redirect.disable' => true));
     }
     
     public function multiPost(array $requests)

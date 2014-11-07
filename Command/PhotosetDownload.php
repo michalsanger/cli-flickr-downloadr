@@ -12,11 +12,11 @@ use Symfony\Component\Console\Output\OutputInterface;
 class PhotosetDownload extends Command
 {
     /**
-     * @var \Rezzza\Flickr\ApiFactory
+     * @var \FlickrDownloadr\FlickrApi\Client
      */
     private $flickrApi;
-
-    function __construct(\Rezzza\Flickr\ApiFactory $flickrApi)
+    
+    function __construct(\FlickrDownloadr\FlickrApi\Client $flickrApi)
     {
         $this->flickrApi = $flickrApi;
         parent::__construct();
@@ -77,11 +77,8 @@ class PhotosetDownload extends Command
         $params = [
             'photoset_id' => $photosetId, 
             'extras' => 'url_o,media,original_format',
-            'format' => 'json',
-            'nojsoncallback' => 1,
         ];
         $response = $this->flickrApi->call('flickr.photosets.getPhotos', $params);
-        $this->dieOnErrorResponse($response);
         $photos = $response['photoset']['photo'];
         return $photos;
     }
@@ -94,11 +91,8 @@ class PhotosetDownload extends Command
     {
         $params = [
             'photoset_id' => $photosetId,
-            'format' => 'json',
-            'nojsoncallback' => 1,
         ];
         $response = $this->flickrApi->call('flickr.photosets.getInfo', $params);
-        $this->dieOnErrorResponse($response);
         return $response['photoset'];
     }
     
@@ -161,20 +155,5 @@ class PhotosetDownload extends Command
             $bytes = $bytes / 1024;
         }
         return round($bytes, $precision) . ' ' . $unit;
-    }
-    
-    /**
-     * @param array $response
-     * @throws \RuntimeException
-     */
-    private function dieOnErrorResponse(array $response)
-    {
-        // TODO: refactor into API wrapper
-        if ($response['stat'] !== 'fail') {
-            return;
-        }
-        $msg = $response['message'];
-        $code = $response['code'];
-        throw new \RuntimeException($msg, $code);
     }
 }
