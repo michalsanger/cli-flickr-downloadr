@@ -1,0 +1,9 @@
+services:
+    command.photoset.authorize:
+        class: FlickrDownloadr\Command\Authorize
+
+    command.photoset.list:
+        class: FlickrDownloadr\Command\PhotosetList
+
+    command.photoset.download:
+        class: FlickrDownloadr\Command\PhotosetDownload
