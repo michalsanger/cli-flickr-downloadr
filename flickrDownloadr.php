@@ -23,7 +23,8 @@ $container = $configurator->createContainer();
 //$robotLoader->register();
 
 $application = new Symfony\Component\Console\Application('Flickr Downloadr');
-$application->add($container->getService('command.photoset.list'));
-$application->add($container->getService('command.photoset.download'));
-$application->add($container->getService('command.photoset.authorize'));
+$commands = $container->findByTag('command');
+foreach ($commands as $commandName => $foo) {
+    $application->add($container->getService($commandName));
+}
 $application->run();

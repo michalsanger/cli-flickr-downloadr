@@ -10,16 +10,19 @@ services:
         class: FlickrDownloadr\Command\Authorize
         arguments:
             - @oauth.client
+        tags: [command]
 
     command.photoset.list:
         class: FlickrDownloadr\Command\PhotosetList
         arguments:
             - @flickrApi.client
+        tags: [command]
 
     command.photoset.download:
         class: FlickrDownloadr\Command\PhotosetDownload
         arguments:
             - @flickrApi.client
+        tags: [command]
 
     flickr.metadata:
         class: Rezzza\Flickr\Metadata
