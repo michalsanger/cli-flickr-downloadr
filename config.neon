@@ -21,7 +21,8 @@ services:
     command.photoset.download:
         class: FlickrDownloadr\Command\PhotosetDownload
         arguments:
-            - @flickrApi.client
+            - @photoset.repository
+            - @photo.repository
         tags: [command]
 
     flickr.metadata:
@@ -50,5 +51,10 @@ services:
 
     photoset.repository:
         class: FlickrDownloadr\Photoset\Repository
+        arguments: 
+            - @flickrApi.client
+
+    photo.repository:
+        class: FlickrDownloadr\Photo\Repository
         arguments: 
             - @flickrApi.client

@@ -37,4 +37,17 @@ class Repository
         return $photosets;
     }
 
+    /**
+     * @param string $id
+     * @return \FlickrDownloadr\Photoset\Photoset
+     */
+    public function findOne($id)
+    {
+        $params = [
+            'photoset_id' => $id,
+        ];
+        $response = $this->flickrApi->call('flickr.photosets.getInfo', $params);
+        $data = $response['photoset'];
+        return new Photoset($data);
+    }
 }

@@ -2,6 +2,8 @@
 
 namespace FlickrDownloadr\Command;
 
+use FlickrDownloadr\Photo\Photo;
+use FlickrDownloadr\Photoset\Photoset;
 use Nette\Utils\Strings;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -12,32 +14,29 @@ use Symfony\Component\Console\Output\OutputInterface;
 class PhotosetDownload extends Command
 {
     /**
-     * @var \FlickrDownloadr\FlickrApi\Client
+     * @var \FlickrDownloadr\Photoset\Repository
      */
-    private $flickrApi;
-    
-    function __construct(\FlickrDownloadr\FlickrApi\Client $flickrApi)
+    private $photosetRepository;
+
+    /**
+     * @var \FlickrDownloadr\Photo\Repository
+     */
+    private $photoRepository;
+
+    function __construct(\FlickrDownloadr\Photoset\Repository $photosetRepository, \FlickrDownloadr\Photo\Repository $photoRepository)
     {
-        $this->flickrApi = $flickrApi;
+        $this->photosetRepository = $photosetRepository;
+        $this->photoRepository = $photoRepository;
         parent::__construct();
     }
-    
+
     protected function configure()
     {
         $this
             ->setName('photoset:download')
             ->setDescription('Download photoset')
-            ->addArgument(
-                'id',
-                InputArgument::REQUIRED,
-                'ID of the photoset'
-            )
-            ->addOption(
-                'no-slug',
-                null,
-                InputOption::VALUE_NONE,
-                'Do not convert filename to safe string'
-            );
+            ->addArgument('id', InputArgument::REQUIRED, 'ID of the photoset')
+            ->addOption('no-slug', null, InputOption::VALUE_NONE, 'Do not convert filename to safe string');
         ;
     }
 
@@ -46,13 +45,13 @@ class PhotosetDownload extends Command
         $id = $input->getArgument('id');
         $noSlug = $input->getOption('no-slug');
         
-        $photosetInfo = $this->getPhotosetInfo($id);
-        $dirName = $this->getDirName($photosetInfo, $noSlug);
+        $photoset = $this->photosetRepository->findOne($id);
+        $dirName = $this->getDirName($photoset, $noSlug);
         if (!is_dir($dirName)) {
             \Nette\Utils\FileSystem::createDir($dirName);
         }
         
-        $photos = $this->getPhotoList($id);
+        $photos = $this->photoRepository->findAllByPhotosetId($id);
         $output->writeln('<info>Number of photos in set: ' . count($photos) . '</info>');
         $i = 1;
         foreach ($photos as $photo) {
@@ -67,47 +66,19 @@ class PhotosetDownload extends Command
             $i++;
         }
     }
-
-    /**
-     * @param string $photosetId
-     * @return array
-     */
-    private function getPhotoList($photosetId)
-    {
-        $params = [
-            'photoset_id' => $photosetId, 
-            'extras' => 'url_o,media,original_format',
-        ];
-        $response = $this->flickrApi->call('flickr.photosets.getPhotos', $params);
-        $photos = $response['photoset']['photo'];
-        return $photos;
-    }
-
-    /**
-     * @param string $photosetId
-     * @return array
-     */
-    private function getPhotosetInfo($photosetId)
-    {
-        $params = [
-            'photoset_id' => $photosetId,
-        ];
-        $response = $this->flickrApi->call('flickr.photosets.getInfo', $params);
-        return $response['photoset'];
-    }
     
     /**
-     * @param array $photo
-     * @param intiger $listOrder
+     * @param Photo $photo
+     * @param int $listOrder
      * @param boolean $noSlug
      * @return string
      */
-    private function getPhotoFilename(array $photo, $listOrder, $noSlug)
+    private function getPhotoFilename(Photo $photo, $listOrder, $noSlug)
     {
         $pos = str_pad($listOrder, 3, '0', STR_PAD_LEFT);
-        $title = $photo['title'];
-        $id = $photo['id'];
-        $extension = $photo['originalformat'];
+        $title = $photo->getTitle();
+        $id = $photo->getId();
+        $extension = $photo->getOriginalFormat();
         
         $filename = $pos . '-' . $title . '-' . $id;
         if (!$noSlug) {
@@ -116,25 +87,29 @@ class PhotosetDownload extends Command
         return $filename . '.' . $extension;
     }
     
-    private function getDirName($photosetInfo, $noSlug)
+    /**
+     * @param Photoset $photosetInfo
+     * @param boolean $noSlug
+     * @return string
+     */
+    private function getDirName(Photoset $photosetInfo, $noSlug)
     {
-        $dirName = $photosetInfo['title']['_content'];
+        $dirName = $photosetInfo->getTitle();
         if (!$noSlug) {
             $dirName = Strings::webalize($dirName);
         }
         return $dirName;
     }
 
-
     /**
-     * @param array $photo
+     * @param Photo $photo
      * @param string $filename
      * @param string $dirName
      * @return int Number of bytes that were written to the file, or FALSE on failure
      */
-    private function downloadPhoto(array $photo, $filename, $dirName)
+    private function downloadPhoto(Photo $photo, $filename, $dirName)
     {
-        $urlOriginal = $photo['url_o'];
+        $urlOriginal = $photo->getUrlO();
         return file_put_contents($dirName . '/' . $filename, fopen($urlOriginal, 'r'));
     }
     
