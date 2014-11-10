@@ -7,6 +7,7 @@ require_once './Command/Authorize.php';
 require_once './FlickrApi/Client.php';
 require_once './FlickrApi/Exception.php';
 require_once './FlickrApi/GuzzleJsonAdapter.php';
+require_once('./Photoset/Photoset.php');
 
 $configurator = new Nette\Configurator();
 $configurator->setTempDirectory('/tmp');

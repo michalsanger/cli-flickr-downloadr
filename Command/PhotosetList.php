@@ -2,6 +2,7 @@
 
 namespace FlickrDownloadr\Command;
 
+use \FlickrDownloadr\Photoset;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputOption;
@@ -50,17 +51,18 @@ class PhotosetList extends Command
         $table = new Table($output);
         $table->setHeaders(array('ID', 'Title', 'Photos'));
         foreach ($sets as $set) {
-            $table->addRow(array($set['id'], $set['title']['_content'], $set['photos']));
+            $table->addRow(array($set->getId(), $set->getTitle(), $set->getPhotos()));
         }
         $table->render();
     }
 
     /**
      * @param InputInterface $input
-     * @return Array
+     * @return \FlickrDownloadr\Photoset\Photoset[];
      */
     private function getPhotosets(InputInterface $input)
     {
+        // TODO: refactor into facade
         $rows = $input->getOption('rows');
         if (!is_numeric($rows)) {
             $rows = 20;
@@ -74,7 +76,11 @@ class PhotosetList extends Command
         }
 
         $response = $this->flickrApi->call('flickr.photosets.getList', $params);
-        $sets = $response['photosets']['photoset'];
-        return $sets;
+        $setsData = $response['photosets']['photoset'];
+        $photosets = array();
+        foreach ($setsData as $setData) {
+            $photosets[] = new Photoset\Photoset($setData);
+        }
+        return $photosets;
     }
 }
