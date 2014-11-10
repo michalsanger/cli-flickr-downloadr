@@ -27,19 +27,8 @@ class PhotosetList extends Command
         $this
             ->setName('photoset:list')
             ->setDescription('List of photosets')
-            ->addOption(
-                'rows',
-                'r',
-                InputOption::VALUE_OPTIONAL,
-                'Number of photosets returned',
-                20
-            )
-            ->addOption(
-                'all',
-                'a',
-                InputOption::VALUE_NONE,
-                'If set, all photosets will be returned'
-            )
+            ->addOption('lines', 'l', InputOption::VALUE_OPTIONAL, 'Number of photosets returned', 20)
+            ->addOption('all', 'a', InputOption::VALUE_NONE, 'If set, all photosets will be returned')
         ;
     }
 
@@ -63,13 +52,13 @@ class PhotosetList extends Command
     private function getPhotosets(InputInterface $input)
     {
         // TODO: refactor into facade
-        $rows = $input->getOption('rows');
-        if (!is_numeric($rows)) {
-            $rows = 20;
+        $lines = $input->getOption('lines');
+        if (!is_numeric($lines)) {
+            $lines = 20;
         }
         $params = array(
             'page' => 1,
-            'per_page' => (int)$rows,
+            'per_page' => (int)$lines,
         );
         if ($input->getOption('all')) {
             unset($params['per_page']);
