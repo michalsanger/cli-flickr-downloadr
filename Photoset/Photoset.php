@@ -4,7 +4,22 @@ namespace FlickrDownloadr\Photoset;
 
 /**
  * @method string getId()
- * @method int getPhotos() Count of photos
+ * @method string getOwner()
+ * @method string getUsername()
+ * @method string getPrimary()
+ * @method string getSecret()
+ * @method string getServer()
+ * @method int getFarm()
+ * @method int getPhotos() Photos count
+ * @method string getCountViews()
+ * @method string getCountComments()
+ * @method string getCountPhotos()
+ * @method int getCountVideos()
+ * @method int getCanComment()
+ * @method string getDateCreate()
+ * @method string getDateUpdate()
+ * @method string getCoverphotoServer()
+ * @method int getCoverphotoFarm()
  */
 class Photoset
 {
@@ -40,14 +55,31 @@ class Photoset
      */
     public function getTitle()
     {
-        if (!array_key_exists('title', $this->data)) {
+        return $this->getInnerContent('title');
+    }
+    
+    /**
+     * @return string
+     */
+    public function getDescription()
+    {
+        return $this->getInnerContent('description');
+    }
+    
+    /**
+     * @param string $propName
+     * @return string
+     */
+    private function getInnerContent($propName)
+    {
+        if (!array_key_exists($propName, $this->data)) {
             return;
         }
-        if (!is_array($this->data['title'])) {
-            return $this->data['title'];
+        if (!is_array($this->data[$propName])) {
+            return $this->data[$propName];
         }
-        if (array_key_exists('_content', $this->data['title'])) {
-            return $this->data['title']['_content'];
+        if (array_key_exists('_content', $this->data[$propName])) {
+            return $this->data[$propName]['_content'];
         }
-    }
+    }        
 }

@@ -88,13 +88,13 @@ class PhotosetDownload extends Command
     }
     
     /**
-     * @param Photoset $photosetInfo
+     * @param Photoset $photoset
      * @param boolean $noSlug
      * @return string
      */
-    private function getDirName(Photoset $photosetInfo, $noSlug)
+    private function getDirName(Photoset $photoset, $noSlug)
     {
-        $dirName = $photosetInfo->getTitle();
+        $dirName = $photoset->getTitle();
         if (!$noSlug) {
             $dirName = Strings::webalize($dirName);
         }

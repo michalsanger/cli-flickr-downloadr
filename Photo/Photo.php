@@ -4,9 +4,19 @@ namespace FlickrDownloadr\Photo;
 
 /**
  * @method string getId()
- * @method int getPhotos() Count of photos
- * @method string getUrlO()
- * @method string getMedia()
+ * @media string getSecret()
+ * @media string getServer()
+ * @media int getFarm()
+ * @media string getIsprimary()
+ * @media int getIsPublic()
+ * @media int getIsFriend()
+ * @media int getIsFamily()
+ * @media string getOriginalsecret()
+ * @media string getMedia()
+ * @media string getMediaStatus()
+ * @media string getUrlO()
+ * @media string getHeightO()
+ * @media string getWidthO()
  */
 class Photo
 {
