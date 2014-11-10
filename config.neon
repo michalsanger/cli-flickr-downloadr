@@ -15,7 +15,7 @@ services:
     command.photoset.list:
         class: FlickrDownloadr\Command\PhotosetList
         arguments:
-            - @flickrApi.client
+            - @photoset.repository
         tags: [command]
 
     command.photoset.download:
@@ -47,3 +47,8 @@ services:
     oauth.client:
         class: tmhOAuth
         arguments: [['consumer_key': %oauth.key%, 'consumer_secret': %oauth.secret%]]
+
+    photoset.repository:
+        class: FlickrDownloadr\Photoset\Repository
+        arguments: 
+            - @flickrApi.client

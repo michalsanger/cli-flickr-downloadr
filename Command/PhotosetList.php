@@ -2,7 +2,6 @@
 
 namespace FlickrDownloadr\Command;
 
-use \FlickrDownloadr\Photoset;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputOption;
@@ -12,13 +11,19 @@ use Symfony\Component\Console\Output\OutputInterface;
 class PhotosetList extends Command
 {
     /**
-     * @var \FlickrDownloadr\FlickrApi\Client
+     * Number of photosets returned
+     * @var int
      */
-    private $flickrApi;
+    const DEFAULT_LIMIT = 20;
+
+    /**
+     * @var \FlickrDownloadr\Photoset\Repository
+     */
+    private $photosetRepository;
     
-    function __construct(\FlickrDownloadr\FlickrApi\Client $flickrApi)
+    function __construct(\FlickrDownloadr\Photoset\Repository $photosetRepository)
     {
-        $this->flickrApi = $flickrApi;
+        $this->photosetRepository = $photosetRepository;
         parent::__construct();
     }
 
@@ -27,7 +32,7 @@ class PhotosetList extends Command
         $this
             ->setName('photoset:list')
             ->setDescription('List of photosets')
-            ->addOption('lines', 'l', InputOption::VALUE_OPTIONAL, 'Number of photosets returned', 20)
+            ->addOption('limit', 'l', InputOption::VALUE_OPTIONAL, 'Number of photosets returned', static::DEFAULT_LIMIT)
             ->addOption('all', 'a', InputOption::VALUE_NONE, 'If set, all photosets will be returned')
         ;
     }
@@ -51,25 +56,13 @@ class PhotosetList extends Command
      */
     private function getPhotosets(InputInterface $input)
     {
-        // TODO: refactor into facade
-        $lines = $input->getOption('lines');
-        if (!is_numeric($lines)) {
-            $lines = 20;
+        $limit = $input->getOption('limit');
+        if (!is_numeric($limit)) {
+            $limit = static::DEFAULT_LIMIT;
         }
-        $params = array(
-            'page' => 1,
-            'per_page' => (int)$lines,
-        );
         if ($input->getOption('all')) {
-            unset($params['per_page']);
+            $limit = NULL;
         }
-
-        $response = $this->flickrApi->call('flickr.photosets.getList', $params);
-        $setsData = $response['photosets']['photoset'];
-        $photosets = array();
-        foreach ($setsData as $setData) {
-            $photosets[] = new Photoset\Photoset($setData);
-        }
-        return $photosets;
+        return $this->photosetRepository->findAll($limit);
     }
 }
