@@ -1,16 +1,16 @@
 #!/usr/bin/env php
 <?php
-require_once './vendor/autoload.php';
-require_once './Command/PhotosetDownload.php';
-require_once './Command/PhotosetList.php';
-require_once './Command/Authorize.php';
-require_once './FlickrApi/Client.php';
-require_once './FlickrApi/Exception.php';
-require_once './FlickrApi/GuzzleJsonAdapter.php';
-require_once './Photoset/Photoset.php';
-require_once './Photoset/Repository.php';
-require_once './Photo/Photo.php';
-require_once './Photo/Repository.php';
+require_once __DIR__ . '/vendor/autoload.php';
+require_once __DIR__ . '/Command/PhotosetDownload.php';
+require_once __DIR__ . '/Command/PhotosetList.php';
+require_once __DIR__ . '/Command/Authorize.php';
+require_once __DIR__ . '/FlickrApi/Client.php';
+require_once __DIR__ . '/FlickrApi/Exception.php';
+require_once __DIR__ . '/FlickrApi/GuzzleJsonAdapter.php';
+require_once __DIR__ . '/Photoset/Photoset.php';
+require_once __DIR__ . '/Photoset/Repository.php';
+require_once __DIR__ . '/Photo/Photo.php';
+require_once __DIR__ . '/Photo/Repository.php';
 
 $configurator = new Nette\Configurator();
 $configurator->setTempDirectory('/tmp');

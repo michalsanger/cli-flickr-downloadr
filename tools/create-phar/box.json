@@ -1,0 +1,16 @@
+{
+    "base-path": "../../",
+    "directories": [
+        "Command",
+        "FlickrApi",
+        "Photo",
+        "Photoset",
+        "vendor"
+    ],
+    "files": [
+        "config.neon"
+    ],
+    "main": "flickrDownloadr.php",
+    "output": "flickr_downloadr.phar",
+    "stub": true
+}
