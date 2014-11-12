@@ -39,7 +39,10 @@ class PhotosetList extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $sets = $this->getPhotosets($input);
+        $limit = (int)$input->getOption('limit');
+        $all = $input->getOption('all');
+        $sets = $this->getPhotosets($limit, $all);
+
         $output->writeln('<info>Number of photosets: ' . count($sets) . '</info>');
 
         $table = new Table($output);
@@ -51,16 +54,16 @@ class PhotosetList extends Command
     }
 
     /**
-     * @param InputInterface $input
+     * @param int $limit
+     * @param boolean $all
      * @return \FlickrDownloadr\Photoset\Photoset[];
      */
-    private function getPhotosets(InputInterface $input)
+    private function getPhotosets($limit, $all)
     {
-        $limit = $input->getOption('limit');
-        if (!is_numeric($limit)) {
+        if ($limit <= 0) {
             $limit = static::DEFAULT_LIMIT;
         }
-        if ($input->getOption('all')) {
+        if ($all === TRUE) {
             $limit = NULL;
         }
         return $this->photosetRepository->findAll($limit);

@@ -46,10 +46,7 @@ class PhotosetDownload extends Command
         $noSlug = $input->getOption('no-slug');
         
         $photoset = $this->photosetRepository->findOne($id);
-        $dirName = $this->getDirName($photoset, $noSlug);
-        if (!is_dir($dirName)) {
-            \Nette\Utils\FileSystem::createDir($dirName);
-        }
+        $dirName = $this->managePhotosetDir($photoset, $noSlug);
         
         $photos = $this->photoRepository->findAllByPhotosetId($id);
         $output->writeln('<info>Number of photos in set: ' . count($photos) . '</info>');
@@ -58,11 +55,8 @@ class PhotosetDownload extends Command
             $filename = $this->getPhotoFilename($photo, $i, $noSlug);
             $output->write($filename . ' ');
             $size = $this->downloadPhoto($photo, $filename, $dirName);
-            if ($size === FALSE) {
-                $output->writeln('<error>Error!</error>');
-            } else {
-                $output->writeln('<comment>(' . $this->formatFilesize($size) . ')</comment>');
-            }
+            $result = $this->getDownloadResult($size);
+            $output->writeln($result);
             $i++;
         }
     }
@@ -92,11 +86,14 @@ class PhotosetDownload extends Command
      * @param boolean $noSlug
      * @return string
      */
-    private function getDirName(Photoset $photoset, $noSlug)
+    private function managePhotosetDir(Photoset $photoset, $noSlug)
     {
         $dirName = $photoset->getTitle();
         if (!$noSlug) {
             $dirName = Strings::webalize($dirName);
+        }
+        if (!is_dir($dirName)) {
+            \Nette\Utils\FileSystem::createDir($dirName);
         }
         return $dirName;
     }
@@ -121,7 +118,6 @@ class PhotosetDownload extends Command
      */
     private function formatFilesize($bytes, $precision = 2)
     {
-        $bytes = round($bytes);
         $units = array('B', 'kB', 'MB', 'GB', 'TB', 'PB');
         foreach ($units as $unit) {
             if (abs($bytes) < 1024 || $unit === end($units)) {
@@ -130,5 +126,19 @@ class PhotosetDownload extends Command
             $bytes = $bytes / 1024;
         }
         return round($bytes, $precision) . ' ' . $unit;
+    }
+    
+    /**
+     * @param int $downloadedSize
+     * @return string
+     */
+    private function getDownloadResult($downloadedSize)
+    {
+        if ($downloadedSize === FALSE) {
+            $result = '<error>Error!</error>';
+        } else {
+            $result = '<comment>(' . $this->formatFilesize($downloadedSize) . ')</comment>';
+        }
+        return $result;
     }
 }
