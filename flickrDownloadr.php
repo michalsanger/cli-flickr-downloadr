@@ -31,4 +31,5 @@ $commands = $container->findByTag('command');
 foreach ($commands as $commandName => $foo) {
     $application->add($container->getService($commandName));
 }
+$application->setVersion($container->getParameters()['version']);
 $application->run();

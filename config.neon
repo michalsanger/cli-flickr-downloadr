@@ -1,4 +1,5 @@
 parameters:
+    version: "v0.0.1"
     oauth:
         key: "3365341effaf533f4fe95f6629a2c9a8"
         secret: "9c21dac1df1c16a3"
