@@ -3,7 +3,7 @@
 require_once __DIR__ . '/vendor/autoload.php';
 
 $configurator = new Nette\Configurator();
-$configurator->setTempDirectory('/tmp');
+$configurator->setTempDirectory(sys_get_temp_dir());
 
 $robotLoader = $configurator->createRobotLoader();
 $robotLoader->autoRebuild = TRUE;
