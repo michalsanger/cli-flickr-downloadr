@@ -7,55 +7,27 @@ parameters:
         tokenSecret: null
 
 services:
-    command.photoset.authorize:
+    - 
         class: FlickrDownloadr\Command\Authorize
-        arguments:
-            - @oauth.client
         tags: [command]
 
-    command.photoset.list:
+    - 
         class: FlickrDownloadr\Command\PhotosetList
-        arguments:
-            - @photoset.repository
         tags: [command]
 
-    command.photoset.download:
+    - 
         class: FlickrDownloadr\Command\PhotosetDownload
-        arguments:
-            - @photoset.repository
-            - @photo.repository
         tags: [command]
 
-    flickr.metadata:
+    - 
         class: Rezzza\Flickr\Metadata
         arguments: [%oauth.key%, %oauth.secret%]
         setup:
             - setOauthAccess(%oauth.token%, %oauth.tokenSecret%)
 
-    flickrApi.guzzleJsonAdapter:
-        class: FlickrDownloadr\FlickrApi\GuzzleJsonAdapter
-
-    flickr.apiFactory:
-        class: Rezzza\Flickr\ApiFactory
-        arguments:
-            - @flickr.metadata
-            - @flickrApi.guzzleJsonAdapter
-
-    flickrApi.client:
-        class: FlickrDownloadr\FlickrApi\Client
-        arguments:
-            - @flickr.apiFactory
-
-    oauth.client:
-        class: tmhOAuth
-        arguments: [['consumer_key': %oauth.key%, 'consumer_secret': %oauth.secret%]]
-
-    photoset.repository:
-        class: FlickrDownloadr\Photoset\Repository
-        arguments: 
-            - @flickrApi.client
-
-    photo.repository:
-        class: FlickrDownloadr\Photo\Repository
-        arguments: 
-            - @flickrApi.client
+    flickrApi.guzzleJsonAdapter: FlickrDownloadr\FlickrApi\GuzzleJsonAdapter
+    - Rezzza\Flickr\ApiFactory(..., @flickrApi.guzzleJsonAdapter)
+    - FlickrDownloadr\FlickrApi\Client
+    - tmhOAuth(['consumer_key': %oauth.key%, 'consumer_secret': %oauth.secret%])
+    - FlickrDownloadr\Photoset\Repository
+    - FlickrDownloadr\Photo\Repository
