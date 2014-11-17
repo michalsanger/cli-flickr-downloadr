@@ -21,8 +21,8 @@ if (is_readable($userConfig)) {
 $container = $configurator->createContainer();
 
 $application = new Symfony\Component\Console\Application('Flickr Downloadr');
-$commands = $container->findByTag('command');
-foreach ($commands as $commandName => $foo) {
+$commands = $container->findByType('Symfony\Component\Console\Command\Command');
+foreach ($commands as $commandName) {
     $application->add($container->getService($commandName));
 }
 $application->setVersion($container->getParameters()['version']);

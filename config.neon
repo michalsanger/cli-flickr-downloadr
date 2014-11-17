@@ -7,17 +7,9 @@ parameters:
         tokenSecret: null
 
 services:
-    - 
-        class: FlickrDownloadr\Command\Authorize
-        tags: [command]
-
-    - 
-        class: FlickrDownloadr\Command\PhotosetList
-        tags: [command]
-
-    - 
-        class: FlickrDownloadr\Command\PhotosetDownload
-        tags: [command]
+    - FlickrDownloadr\Command\Authorize
+    - FlickrDownloadr\Command\PhotosetList
+    - FlickrDownloadr\Command\PhotosetDownload
 
     - 
         class: Rezzza\Flickr\Metadata
