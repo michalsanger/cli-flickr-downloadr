@@ -7,10 +7,10 @@ $configurator->setTempDirectory(sys_get_temp_dir());
 
 $robotLoader = $configurator->createRobotLoader();
 $robotLoader->autoRebuild = TRUE;
-$robotLoader->addDirectory('Command');
-$robotLoader->addDirectory('FlickrApi');
-$robotLoader->addDirectory('Photoset');
-$robotLoader->addDirectory('Photo');
+$dirs = array('Command', 'FlickrApi', 'Photoset', 'Photo');
+foreach ($dirs as $dir) {
+	$robotLoader->addDirectory(__DIR__ . '/' . $dir);
+}
 $robotLoader->register();
 
 $configurator->addConfig(__DIR__ . '/config.neon');
