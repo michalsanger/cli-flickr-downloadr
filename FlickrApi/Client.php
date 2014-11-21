@@ -23,9 +23,14 @@ class Client
     {
         $params['format'] = 'json';
         $params['nojsoncallback'] = 1;
-        $response = $this->httpClient->call($service, $params);
-        $this->dieOnErrorResponse($response);
-        return $response;
+		try {
+			$response = $this->httpClient->call($service, $params);
+			$this->dieOnErrorResponse($response);
+			return $response;
+		} catch (\LogicException $e) {
+			$msg = $e->getMessage() . "\nTry to run:\nflickr_downloadr authorize";
+			throw new \Nette\Security\AuthenticationException($msg);
+		}
     }
 
     /**
