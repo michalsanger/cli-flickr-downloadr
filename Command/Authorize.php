@@ -7,25 +7,38 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\Question;
 use Symfony\Component\Console\Formatter\OutputFormatterStyle;
+use GuzzleHttp\Client;
+use GuzzleHttp\Subscriber\Oauth\Oauth1;
 
 
 class Authorize extends Command
 {
     const CONSUMER_KEY = '3365341effaf533f4fe95f6629a2c9a8';
     const CONSUMER_SECRET = '9c21dac1df1c16a3';
-    const URL_REQUEST_TOKEN = 'https://www.flickr.com/services/oauth/request_token';
+	const URL_REQUEST_TOKEN = 'https://www.flickr.com/services/oauth/request_token';
     const URL_AUTHORIZE = 'https://www.flickr.com/services/oauth/authorize';
     const URL_ACCESS_TOKEN = 'https://www.flickr.com/services/oauth/access_token';
     const AUTHORIZE_PERMS = 'read';
 
     /**
-     * @var \tmhOAuth
+     * @var \GuzzleHttp\Client
      */
     private $oauthClient;
+	
+	private $userToken;
+	private $userTokenSecret;
     
-    function __construct(\tmhOAuth $oauthClient)
+    function __construct()
     {
-        $this->oauthClient = $oauthClient;
+		$this->oauthClient = new Client([
+			'base_url' => 'https://www.flickr.com/services/oauth/',
+			'defaults' => ['auth' => 'oauth']
+		]);
+		$oauth = new Oauth1([
+			'consumer_key'    => self::CONSUMER_KEY,
+			'consumer_secret' => self::CONSUMER_SECRET,
+		]);
+		$this->oauthClient->getEmitter()->attach($oauth);
         parent::__construct();
     }
 
@@ -60,30 +73,31 @@ class Authorize extends Command
     
     private function getRequestToken()
     {
-        $code = $this->oauthClient->apponly_request([
-            'without_bearer' => true,
-            'method' => 'POST',
-            'url' => self::URL_REQUEST_TOKEN,
-            'params' => [
-                'oauth_callback' => 'oob'
-            ]
-        ]);
+		$options = [
+			'query' => [
+				'oauth_callback' => 'oob'
+			]
+		];
+		$res = $this->oauthClient->get('request_token', $options);
+		$code = (int)$res->getStatusCode();
+		$body = $res->getBody()->getContents();
+		$resp = [];
+		parse_str($body, $resp);
         if ($code != 200) {
             throw new \Exception('There was an error communicating with Flickr. ' 
                 . $this->oauthClient->response['response']);
         }
-        $resp = $this->oauthClient->extract_params($this->oauthClient->response['response']);
         if ($resp['oauth_callback_confirmed'] !== "true") {
             throw new \Exception('The callback was not confirmed by Flickr.');
         }
-        $this->oauthClient->config['user_token'] = $resp['oauth_token'];
-        $this->oauthClient->config['user_secret'] = $resp['oauth_token_secret'];
+		$this->userToken = $resp['oauth_token'];
+		$this->userTokenSecret = $resp['oauth_token_secret'];
     }
     
     private function getPinCode(InputInterface $input, OutputInterface $output)
     {
         $output->writeln('<info>Copy and paste this URL into your web browser and follow the prompts to get a pin code:</info>');
-        $urlQuery = http_build_query(['oauth_token' => $this->oauthClient->config['user_token'], 'perms' => self::AUTHORIZE_PERMS]);
+        $urlQuery = http_build_query(['oauth_token' => $this->userToken, 'perms' => self::AUTHORIZE_PERMS]);
         $authUrl = self::URL_AUTHORIZE . '?' . $urlQuery;
         $output->writeln('<bold>' . $authUrl . '</bold>');
         
@@ -100,19 +114,28 @@ class Authorize extends Command
      */
     private function getAccessToken($pinCode)
     {
-        $code = $this->oauthClient->user_request([
-            'method' => 'POST',
-            'url' => self::URL_ACCESS_TOKEN,
-            'params' => [
-                'oauth_verifier' => $pinCode,
-                'oauth_token' => $this->oauthClient->config['user_token'],
-            ],
-        ]);
+		$oauth = new Oauth1([
+			'consumer_key'    => self::CONSUMER_KEY,
+			'consumer_secret' => self::CONSUMER_SECRET,
+			'token' => $this->userToken,
+			'token_secret' => $this->userTokenSecret,
+		]);
+		$this->oauthClient->getEmitter()->attach($oauth);
+		$options = [
+			'query' => [
+				'oauth_verifier' => $pinCode,
+				'oauth_token' => $this->userToken,
+			]
+		];
+		$res = $this->oauthClient->get('access_token', $options);
+		$code = (int)$res->getStatusCode();
+		$resp = [];
+		parse_str($res->getBody()->getContents(), $resp);
+		
         if ($code != 200) {
             throw new \Exception('There was an error communicating with Flickr. ' 
                 . $this->oauthClient->response['response']);
         }
-        $resp = $this->oauthClient->extract_params($this->oauthClient->response['response']);
         return $resp;
     }
     
