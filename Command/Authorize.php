@@ -10,11 +10,14 @@ use Symfony\Component\Console\Formatter\OutputFormatterStyle;
 
 class Authorize extends Command
 {
-	const URL_REQUEST_TOKEN = 'https://www.flickr.com/services/oauth/request_token';
-    const URL_AUTHORIZE = 'https://www.flickr.com/services/oauth/authorize';
-    const URL_ACCESS_TOKEN = 'https://www.flickr.com/services/oauth/access_token';
+	const URL_PATH_REQUEST_TOKEN = 'request_token';
+    const URL_PATH_AUTHORIZE = 'authorize';
+    const URL_PATH_ACCESS_TOKEN = 'access_token';
     const AUTHORIZE_PERMS = 'read';
 
+	/** @var string */
+	private $baseUrl;
+	
 	/** @var string */
 	private $consumerKey;
 
@@ -25,12 +28,14 @@ class Authorize extends Command
     private $oauthClientFactory;
 
 	/**
+	 * @param string $baseUrl
 	 * @param string $consumerKey
 	 * @param string $consumerSecret
 	 * @param \FlickrDownloadr\Oauth\ClientFactory $oauthClientFactory
 	 */
-    function __construct($consumerKey, $consumerSecret, \FlickrDownloadr\Oauth\ClientFactory $oauthClientFactory)
+    function __construct($baseUrl, $consumerKey, $consumerSecret, \FlickrDownloadr\Oauth\ClientFactory $oauthClientFactory)
     {
+		$this->baseUrl = $baseUrl;
 		$this->consumerKey = $consumerKey;
 		$this->consumerSecret = $consumerSecret;
 		$this->oauthClientFactory = $oauthClientFactory;
@@ -79,7 +84,7 @@ class Authorize extends Command
 				'oauth_callback' => 'oob'
 			]
 		];
-		$res = $oauthClient->get('request_token', $options);
+		$res = $oauthClient->get(self::URL_PATH_REQUEST_TOKEN, $options);
 		$code = (int)$res->getStatusCode();
 		$body = $res->getBody()->getContents();
 		parse_str($body, $resp);
@@ -99,7 +104,7 @@ class Authorize extends Command
     {
         $output->writeln('<info>Copy and paste this URL into your web browser and follow the prompts to get a pin code:</info>');
         $urlQuery = http_build_query(['oauth_token' => $requestToken, 'perms' => self::AUTHORIZE_PERMS]);
-        $authUrl = self::URL_AUTHORIZE . '?' . $urlQuery;
+        $authUrl = $this->baseUrl . self::URL_PATH_AUTHORIZE . '?' . $urlQuery;
         $output->writeln('<bold>' . $authUrl . '</bold>');
         
         $helper = $this->getHelper('question');
@@ -124,7 +129,7 @@ class Authorize extends Command
 			]
 		];
 		$oauthClient = $this->oauthClientFactory->createInstance($requestToken, $requestTokenSecret);
-		$res = $oauthClient->get('access_token', $options);
+		$res = $oauthClient->get(self::URL_PATH_ACCESS_TOKEN, $options);
 		$code = (int)$res->getStatusCode();
 		$resp = [];
 		parse_str($res->getBody()->getContents(), $resp);
