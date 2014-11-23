@@ -21,7 +21,6 @@ services:
     flickrApi.guzzleJsonAdapter: FlickrDownloadr\FlickrApi\GuzzleJsonAdapter
     - Rezzza\Flickr\ApiFactory(..., @flickrApi.guzzleJsonAdapter)
     - FlickrDownloadr\FlickrApi\Client
-    - tmhOAuth(['consumer_key': %oauth.key%, 'consumer_secret': %oauth.secret%])
     - FlickrDownloadr\Photoset\Repository
     - FlickrDownloadr\Photo\Repository
     - FlickrDownloadr\Oauth\ClientFactory(%oauth.baseUrl%, %oauth.key%, %oauth.secret%)
