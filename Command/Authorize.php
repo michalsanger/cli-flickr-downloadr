@@ -20,9 +20,6 @@ class Authorize extends Command
     /** @var \FlickrDownloadr\Oauth\ClientFactory */
     private $oauthClientFactory;
 
-	private $userToken;
-	private $userTokenSecret;
-
     function __construct(\FlickrDownloadr\Oauth\ClientFactory $oauthClientFactory)
     {
 		$this->oauthClientFactory = $oauthClientFactory;
@@ -39,9 +36,9 @@ class Authorize extends Command
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $this->printWelcome($output);
-        $this->getRequestToken();
-        $pinCode = $this->getPinCode($input, $output);
-        $oauthResponse = $this->getAccessToken($pinCode);
+        list($requestToken, $requestTokenSecret) = $this->getRequestToken();
+        $pinCode = $this->getPinCode($input, $output, $requestToken);
+        $oauthResponse = $this->getAccessToken($pinCode, $requestToken, $requestTokenSecret);
         $this->saveToConfig($output, $oauthResponse['oauth_token'], $oauthResponse['oauth_token_secret']);
     }
     
@@ -58,6 +55,11 @@ class Authorize extends Command
         $output->writeln('');
     }
     
+	/**
+	 * 
+	 * @return array userToken, userTokenSecret
+	 * @throws \Exception
+	 */
     private function getRequestToken()
     {
 		$oauthClient = $this->oauthClientFactory->createInstance();
@@ -69,23 +71,23 @@ class Authorize extends Command
 		$res = $oauthClient->get('request_token', $options);
 		$code = (int)$res->getStatusCode();
 		$body = $res->getBody()->getContents();
-		$resp = [];
 		parse_str($body, $resp);
         if ($code != 200) {
-            throw new \Exception('There was an error communicating with Flickr. ' 
-                . $this->oauthClient->response['response']);
+            throw new \Exception('There was an error communicating with Flickr. ' . $this->oauthClient->response['response']);
         }
         if ($resp['oauth_callback_confirmed'] !== "true") {
             throw new \Exception('The callback was not confirmed by Flickr.');
         }
-		$this->userToken = $resp['oauth_token'];
-		$this->userTokenSecret = $resp['oauth_token_secret'];
+		return array(
+			$resp['oauth_token'],
+			$resp['oauth_token_secret'],
+		);
     }
     
-    private function getPinCode(InputInterface $input, OutputInterface $output)
+    private function getPinCode(InputInterface $input, OutputInterface $output, $requestToken)
     {
         $output->writeln('<info>Copy and paste this URL into your web browser and follow the prompts to get a pin code:</info>');
-        $urlQuery = http_build_query(['oauth_token' => $this->userToken, 'perms' => self::AUTHORIZE_PERMS]);
+        $urlQuery = http_build_query(['oauth_token' => $requestToken, 'perms' => self::AUTHORIZE_PERMS]);
         $authUrl = self::URL_AUTHORIZE . '?' . $urlQuery;
         $output->writeln('<bold>' . $authUrl . '</bold>');
         
@@ -97,18 +99,20 @@ class Authorize extends Command
     
     /**
      * @param string $pinCode
+     * @param string $requestToken
+     * @param string $requestTokenSecret
      * @return array
      * @throws \Exception
      */
-    private function getAccessToken($pinCode)
+    private function getAccessToken($pinCode, $requestToken, $requestTokenSecret)
     {
 		$options = [
 			'query' => [
 				'oauth_verifier' => $pinCode,
-				'oauth_token' => $this->userToken,
+				'oauth_token' => $requestToken,
 			]
 		];
-		$oauthClient = $this->oauthClientFactory->createInstance($this->userToken, $this->userTokenSecret);
+		$oauthClient = $this->oauthClientFactory->createInstance($requestToken, $requestTokenSecret);
 		$res = $oauthClient->get('access_token', $options);
 		$code = (int)$res->getStatusCode();
 		$resp = [];
