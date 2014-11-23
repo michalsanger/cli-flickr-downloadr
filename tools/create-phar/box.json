@@ -3,6 +3,7 @@
     "directories": [
         "Command",
         "FlickrApi",
+        "Oauth",
         "Photo",
         "Photoset",
         "vendor"
