@@ -10,18 +10,29 @@ use Symfony\Component\Console\Formatter\OutputFormatterStyle;
 
 class Authorize extends Command
 {
-    const CONSUMER_KEY = '3365341effaf533f4fe95f6629a2c9a8';
-    const CONSUMER_SECRET = '9c21dac1df1c16a3';
 	const URL_REQUEST_TOKEN = 'https://www.flickr.com/services/oauth/request_token';
     const URL_AUTHORIZE = 'https://www.flickr.com/services/oauth/authorize';
     const URL_ACCESS_TOKEN = 'https://www.flickr.com/services/oauth/access_token';
     const AUTHORIZE_PERMS = 'read';
 
+	/** @var string */
+	private $consumerKey;
+
+	/** @var string */
+	private $consumerSecret;
+	
     /** @var \FlickrDownloadr\Oauth\ClientFactory */
     private $oauthClientFactory;
 
-    function __construct(\FlickrDownloadr\Oauth\ClientFactory $oauthClientFactory)
+	/**
+	 * @param string $consumerKey
+	 * @param string $consumerSecret
+	 * @param \FlickrDownloadr\Oauth\ClientFactory $oauthClientFactory
+	 */
+    function __construct($consumerKey, $consumerSecret, \FlickrDownloadr\Oauth\ClientFactory $oauthClientFactory)
     {
+		$this->consumerKey = $consumerKey;
+		$this->consumerSecret = $consumerSecret;
 		$this->oauthClientFactory = $oauthClientFactory;
         parent::__construct();
     }
@@ -128,8 +139,8 @@ class Authorize extends Command
     private function saveToConfig(OutputInterface $output, $token, $tokenSecret)
     {
         $oauth = array();
-        $oauth['key'] = self::CONSUMER_KEY;
-        $oauth['secret'] = self::CONSUMER_SECRET;
+        $oauth['key'] = $this->consumerKey;
+        $oauth['secret'] = $this->consumerSecret;
         $oauth['token'] = $token;
         $oauth['tokenSecret'] = $tokenSecret;
         $conf = array('parameters' => array('oauth' => $oauth));

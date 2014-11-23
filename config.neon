@@ -8,7 +8,7 @@ parameters:
         tokenSecret: null
 
 services:
-    - FlickrDownloadr\Command\Authorize
+    - FlickrDownloadr\Command\Authorize(%oauth.key%, %oauth.secret%)
     - FlickrDownloadr\Command\PhotosetList
     - FlickrDownloadr\Command\PhotosetDownload
 
