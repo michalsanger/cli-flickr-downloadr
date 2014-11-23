@@ -7,9 +7,6 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\Question;
 use Symfony\Component\Console\Formatter\OutputFormatterStyle;
-use GuzzleHttp\Client;
-use GuzzleHttp\Subscriber\Oauth\Oauth1;
-
 
 class Authorize extends Command
 {
@@ -20,25 +17,15 @@ class Authorize extends Command
     const URL_ACCESS_TOKEN = 'https://www.flickr.com/services/oauth/access_token';
     const AUTHORIZE_PERMS = 'read';
 
-    /**
-     * @var \GuzzleHttp\Client
-     */
-    private $oauthClient;
-	
+    /** @var \FlickrDownloadr\Oauth\ClientFactory */
+    private $oauthClientFactory;
+
 	private $userToken;
 	private $userTokenSecret;
-    
-    function __construct()
+
+    function __construct(\FlickrDownloadr\Oauth\ClientFactory $oauthClientFactory)
     {
-		$this->oauthClient = new Client([
-			'base_url' => 'https://www.flickr.com/services/oauth/',
-			'defaults' => ['auth' => 'oauth']
-		]);
-		$oauth = new Oauth1([
-			'consumer_key'    => self::CONSUMER_KEY,
-			'consumer_secret' => self::CONSUMER_SECRET,
-		]);
-		$this->oauthClient->getEmitter()->attach($oauth);
+		$this->oauthClientFactory = $oauthClientFactory;
         parent::__construct();
     }
 
@@ -73,12 +60,13 @@ class Authorize extends Command
     
     private function getRequestToken()
     {
+		$oauthClient = $this->oauthClientFactory->createInstance();
 		$options = [
 			'query' => [
 				'oauth_callback' => 'oob'
 			]
 		];
-		$res = $this->oauthClient->get('request_token', $options);
+		$res = $oauthClient->get('request_token', $options);
 		$code = (int)$res->getStatusCode();
 		$body = $res->getBody()->getContents();
 		$resp = [];
@@ -114,20 +102,14 @@ class Authorize extends Command
      */
     private function getAccessToken($pinCode)
     {
-		$oauth = new Oauth1([
-			'consumer_key'    => self::CONSUMER_KEY,
-			'consumer_secret' => self::CONSUMER_SECRET,
-			'token' => $this->userToken,
-			'token_secret' => $this->userTokenSecret,
-		]);
-		$this->oauthClient->getEmitter()->attach($oauth);
 		$options = [
 			'query' => [
 				'oauth_verifier' => $pinCode,
 				'oauth_token' => $this->userToken,
 			]
 		];
-		$res = $this->oauthClient->get('access_token', $options);
+		$oauthClient = $this->oauthClientFactory->createInstance($this->userToken, $this->userTokenSecret);
+		$res = $oauthClient->get('access_token', $options);
 		$code = (int)$res->getStatusCode();
 		$resp = [];
 		parse_str($res->getBody()->getContents(), $resp);

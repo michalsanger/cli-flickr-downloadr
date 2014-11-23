@@ -12,6 +12,7 @@ require_once __DIR__ . '/Photoset/Photoset.php';
 require_once __DIR__ . '/Photoset/Repository.php';
 require_once __DIR__ . '/Photo/Photo.php';
 require_once __DIR__ . '/Photo/Repository.php';
+require_once __DIR__ . '/Oauth/ClientFactory.php';
 
 $configurator = new Nette\Configurator();
 $configurator->setTempDirectory(sys_get_temp_dir());

@@ -1,6 +1,7 @@
 parameters:
     version: "v0.0.1"
     oauth:
+        baseUrl: "https://www.flickr.com/services/oauth/"
         key: "3365341effaf533f4fe95f6629a2c9a8"
         secret: "9c21dac1df1c16a3"
         token: null
@@ -23,3 +24,4 @@ services:
     - tmhOAuth(['consumer_key': %oauth.key%, 'consumer_secret': %oauth.secret%])
     - FlickrDownloadr\Photoset\Repository
     - FlickrDownloadr\Photo\Repository
+    - FlickrDownloadr\Oauth\ClientFactory(%oauth.baseUrl%, %oauth.key%, %oauth.secret%)
