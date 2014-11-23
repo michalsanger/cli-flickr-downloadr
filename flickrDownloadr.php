@@ -18,7 +18,7 @@ $configurator = new Nette\Configurator();
 $configurator->setTempDirectory(sys_get_temp_dir());
 
 $configurator->addConfig(__DIR__ . '/config.neon');
-$userConfig = $_SERVER['HOME'] . '/.flickrDownloadr.neon';
+$userConfig = $_SERVER['HOME'] . '/' . FlickrDownloadr\Command\Authorize::USER_CONFIG_FILENAME;
 if (is_readable($userConfig)) {
     $configurator->addConfig($userConfig);
 }

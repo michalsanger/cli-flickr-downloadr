@@ -14,6 +14,7 @@ class Authorize extends Command
     const URL_PATH_AUTHORIZE = 'authorize';
     const URL_PATH_ACCESS_TOKEN = 'access_token';
     const AUTHORIZE_PERMS = 'read';
+	const USER_CONFIG_FILENAME = '.flickrDownloadr.neon';
 
 	/** @var string */
 	private $baseUrl;
@@ -150,7 +151,7 @@ class Authorize extends Command
         $oauth['tokenSecret'] = $tokenSecret;
         $conf = array('parameters' => array('oauth' => $oauth));
         
-        $confFilename = $_SERVER['HOME'] . '/.flickrDownloadr.neon';
+        $confFilename = $_SERVER['HOME'] . '/' . self::USER_CONFIG_FILENAME;
         $neonEncoder = new \Nette\Neon\Encoder();
         $confEncoded = $neonEncoder->encode($conf, 1);
         if (file_put_contents($confFilename, $confEncoded) === FALSE) {
