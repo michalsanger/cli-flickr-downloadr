@@ -11,8 +11,8 @@ It's a single file, just download it somewhere into the ```$PATH```:
     mv flickr_downloadr.phar /usr/local/bin/flickr_downloadr
 
 ## Screenshots
-![Help screen](https://farm6.staticflickr.com/5605/15217321183_fa41b9d7c8_o.png)
+![Help screen](https://farm8.staticflickr.com/7540/15684400780_71c8f45300_o.png)
 
-![List photosets](https://farm6.staticflickr.com/5609/15836738135_e375828a61_o.png)
+![List photosets](https://farm8.staticflickr.com/7548/15685714469_0993a160dd_o.png)
 
-![Download photoset](https://farm8.staticflickr.com/7536/15836738105_75fb210675_o.png)
+![Download photoset](https://farm8.staticflickr.com/7474/15684400790_fc011fb7bb_o.png)
