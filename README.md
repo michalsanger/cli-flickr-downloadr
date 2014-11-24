@@ -4,7 +4,7 @@ Backup your Flickr with this console app
 
 ## Installation
 
-It's a single [PHP Archive (PHAR)](http://php.net/phar) file, just download it and save samewhere in the ```$PATH```:
+It's a single file, just download it somewhere into the ```$PATH```:
 
     wget https://github.com/michalsanger/cli-flickr-downloadr/releases/download/v0.5.0/flickr_downloadr.phar
     chmod u+x flickr_downloadr.phar
