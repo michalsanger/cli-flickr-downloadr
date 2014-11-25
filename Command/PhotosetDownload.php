@@ -54,7 +54,7 @@ class PhotosetDownload extends Command
         $output->writeln('<info>Number of photos in set: ' . count($photos) . '</info>');
         $i = 1;
         foreach ($photos as $photo) {
-            $filename = $this->getPhotoFilename($photo, $i, $noSlug);
+            $filename = $this->getPhotoFilename($photo, $i, count($photos), $noSlug);
             $output->write($filename . ' ');
             $size = $this->downloadPhoto($photo, $filename, $dirName, $dryRun);
             $result = $this->getDownloadResult($size);
@@ -66,12 +66,14 @@ class PhotosetDownload extends Command
     /**
      * @param Photo $photo
      * @param int $listOrder
+     * @param int $$photosCount
      * @param boolean $noSlug
      * @return string
      */
-    private function getPhotoFilename(Photo $photo, $listOrder, $noSlug)
+    private function getPhotoFilename(Photo $photo, $listOrder, $photosCount, $noSlug)
     {
-        $pos = str_pad($listOrder, 3, '0', STR_PAD_LEFT);
+		$padLength = strlen((string)$photosCount);
+        $pos = str_pad($listOrder, $padLength, '0', STR_PAD_LEFT);
         $title = $photo->getTitle();
         $id = $photo->getId();
         $extension = $photo->getOriginalFormat();
