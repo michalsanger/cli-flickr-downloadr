@@ -66,7 +66,7 @@ class PhotosetDownload extends Command
     /**
      * @param Photo $photo
      * @param int $listOrder
-     * @param int $$photosCount
+     * @param int $photosCount
      * @param boolean $noSlug
      * @return string
      */
