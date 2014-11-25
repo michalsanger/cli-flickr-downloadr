@@ -6,7 +6,7 @@ Backup your Flickr with this console app
 
 It's a single file, just download it somewhere into the ```$PATH```:
 
-    wget https://github.com/michalsanger/cli-flickr-downloadr/releases/download/v0.5.0/flickr_downloadr.phar
+    wget https://github.com/michalsanger/cli-flickr-downloadr/releases/download/v0.5.0/flickr_downloadr.phar -O flickr_downloadr.phar
     chmod u+x flickr_downloadr.phar
     mv flickr_downloadr.phar /usr/local/bin/flickr_downloadr
 
