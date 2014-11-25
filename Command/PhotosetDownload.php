@@ -36,7 +36,8 @@ class PhotosetDownload extends Command
             ->setName('photoset:download')
             ->setDescription('Download photoset')
             ->addArgument('id', InputArgument::REQUIRED, 'ID of the photoset')
-            ->addOption('no-slug', null, InputOption::VALUE_NONE, 'Do not convert filename to safe string');
+            ->addOption('no-slug', null, InputOption::VALUE_NONE, 'Do not convert filename to safe string')
+            ->addOption('dry-run', null, InputOption::VALUE_NONE, 'Do not realy download');
         ;
     }
 
@@ -44,6 +45,7 @@ class PhotosetDownload extends Command
     {
         $id = $input->getArgument('id');
         $noSlug = $input->getOption('no-slug');
+        $dryRun = $input->getOption('dry-run');
         
         $photoset = $this->photosetRepository->findOne($id);
         $dirName = $this->managePhotosetDir($photoset, $noSlug);
@@ -54,7 +56,7 @@ class PhotosetDownload extends Command
         foreach ($photos as $photo) {
             $filename = $this->getPhotoFilename($photo, $i, $noSlug);
             $output->write($filename . ' ');
-            $size = $this->downloadPhoto($photo, $filename, $dirName);
+            $size = $this->downloadPhoto($photo, $filename, $dirName, $dryRun);
             $result = $this->getDownloadResult($size);
             $output->writeln($result);
             $i++;
@@ -102,11 +104,15 @@ class PhotosetDownload extends Command
      * @param Photo $photo
      * @param string $filename
      * @param string $dirName
+     * @param boolean $dryRun
      * @return int Number of bytes that were written to the file, or FALSE on failure
      */
-    private function downloadPhoto(Photo $photo, $filename, $dirName)
+    private function downloadPhoto(Photo $photo, $filename, $dirName, $dryRun)
     {
         $urlOriginal = $photo->getUrlO();
+		if ($dryRun) {
+			return 0;
+		}
         return file_put_contents($dirName . '/' . $filename, fopen($urlOriginal, 'r'));
     }
     
