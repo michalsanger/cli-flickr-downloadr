@@ -48,7 +48,7 @@ class PhotosetDownload extends Command
         $dryRun = $input->getOption('dry-run');
         
         $photoset = $this->photosetRepository->findOne($id);
-        $dirName = $this->managePhotosetDir($photoset, $noSlug);
+        $dirName = $this->managePhotosetDir($photoset, $noSlug, $dryRun);
         
         $photos = $this->photoRepository->findAllByPhotosetId($id);
         $output->writeln('<info>Number of photos in set: ' . count($photos) . '</info>');
@@ -88,15 +88,16 @@ class PhotosetDownload extends Command
     /**
      * @param Photoset $photoset
      * @param boolean $noSlug
+     * @param boolean $dryRun
      * @return string
      */
-    private function managePhotosetDir(Photoset $photoset, $noSlug)
+    private function managePhotosetDir(Photoset $photoset, $noSlug, $dryRun)
     {
         $dirName = $photoset->getTitle();
         if (!$noSlug) {
             $dirName = Strings::webalize($dirName);
         }
-        if (!is_dir($dirName)) {
+        if (!is_dir($dirName) && !$dryRun) {
             \Nette\Utils\FileSystem::createDir($dirName);
         }
         return $dirName;
