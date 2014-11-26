@@ -1,9 +1,26 @@
 {
+    "name": "michalsanger/cli-flickr-downloadr",
+    "description": "Backup your Flickr with this console app",
+    "keywords": ["flickr", "backup", "download", "cli", "app"],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Michal Sänger",
+            "email": "michal.sanger@gmail.com"
+        }
+    ],
     "require": {
+        "php": ">=5.3.0"
+    },
+    "require-dev": {
         "rezzza/flickr": "1.1.*@dev",
         "guzzle/http": "3.9.*",
         "guzzlehttp/oauth-subscriber": "0.1.*",
         "nette/nette": "2.2.*",
         "symfony/console": "2.5.*"
-    }
+    },
+    "autoload": {
+        "classmap": ["FlickrDownloadr"]
+    },
+    "bin": ["src/flickr_downloadr"]
 }
