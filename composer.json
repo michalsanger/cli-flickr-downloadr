@@ -20,7 +20,7 @@
         "symfony/console": "2.5.*"
     },
     "autoload": {
-        "classmap": ["FlickrDownloadr"]
+        "classmap": ["FlickrDownloadr/"]
     },
     "bin": ["bin/flickr_downloadr"]
 }
