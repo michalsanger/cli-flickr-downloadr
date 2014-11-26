@@ -22,5 +22,5 @@
     "autoload": {
         "classmap": ["FlickrDownloadr"]
     },
-    "bin": ["src/flickr_downloadr"]
+    "bin": ["bin/flickr_downloadr"]
 }
