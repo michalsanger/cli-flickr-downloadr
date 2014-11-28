@@ -10,6 +10,13 @@ Backup your Flickr with this console app
     chmod u+x flickr_downloadr.phar
     mv flickr_downloadr.phar /usr/local/bin/flickr_downloadr
 
+## Usage
+At first, you have to allow access to your photos for this app:
+
+```flickr_downloadr authorize```
+
+There is a [step by step tutorial with screenshots](https://github.com/michalsanger/cli-flickr-downloadr/wiki/Authorization)
+
 ## Screenshots
 ![Help screen](https://farm8.staticflickr.com/7540/15684400780_71c8f45300_o.png)
 
