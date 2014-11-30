@@ -22,5 +22,6 @@ services:
     - Rezzza\Flickr\ApiFactory(..., @flickrApi.guzzleJsonAdapter)
     - FlickrDownloadr\FlickrApi\Client
     - FlickrDownloadr\Photoset\Repository
+    - FlickrDownloadr\Photoset\DirnameCreator
     - FlickrDownloadr\Photo\Repository
     - FlickrDownloadr\Oauth\ClientFactory(%oauth.baseUrl%, %oauth.key%, %oauth.secret%)

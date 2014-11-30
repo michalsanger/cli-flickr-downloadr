@@ -22,11 +22,21 @@ class PhotosetDownload extends Command
      * @var \FlickrDownloadr\Photo\Repository
      */
     private $photoRepository;
-
-    function __construct(\FlickrDownloadr\Photoset\Repository $photosetRepository, \FlickrDownloadr\Photo\Repository $photoRepository)
+	
+	/**
+	 * @var \FlickrDownloadr\Photoset\DirnameCreator
+	 */
+	private $dirnameCreator;
+	
+	public function __construct(
+		\FlickrDownloadr\Photoset\Repository $photosetRepository, 
+		\FlickrDownloadr\Photo\Repository $photoRepository,
+		\FlickrDownloadr\Photoset\DirnameCreator $dirnameCreator
+	)
     {
         $this->photosetRepository = $photosetRepository;
         $this->photoRepository = $photoRepository;
+		$this->dirnameCreator = $dirnameCreator;
         parent::__construct();
     }
 
@@ -37,7 +47,8 @@ class PhotosetDownload extends Command
             ->setDescription('Download photoset')
             ->addArgument('id', InputArgument::REQUIRED, 'ID of the photoset')
             ->addOption('no-slug', null, InputOption::VALUE_NONE, 'Do not convert filename to safe string')
-            ->addOption('dry-run', null, InputOption::VALUE_NONE, 'Do not realy download');
+            ->addOption('dry-run', null, InputOption::VALUE_NONE, 'Do not realy download')
+            ->addOption('dir', null, InputOption::VALUE_OPTIONAL, 'Photoset directory. Supported placeholders: %id%, %title%, %year%, %month%, %day%', '%title%-%id%');
         ;
     }
 
@@ -46,9 +57,10 @@ class PhotosetDownload extends Command
         $id = $input->getArgument('id');
         $noSlug = $input->getOption('no-slug');
         $dryRun = $input->getOption('dry-run');
+        $dir = $input->getOption('dir');
         
         $photoset = $this->photosetRepository->findOne($id);
-        $dirName = $this->managePhotosetDir($photoset, $noSlug, $dryRun);
+        $dirName = $this->managePhotosetDir($photoset, $noSlug, $dryRun, $dir);
         
         $photos = $this->photoRepository->findAllByPhotosetId($id);
         $output->writeln('<info>Number of photos in set: ' . count($photos) . '</info>');
@@ -89,14 +101,12 @@ class PhotosetDownload extends Command
      * @param Photoset $photoset
      * @param boolean $noSlug
      * @param boolean $dryRun
+     * @param string $dir
      * @return string
      */
-    private function managePhotosetDir(Photoset $photoset, $noSlug, $dryRun)
+    private function managePhotosetDir(Photoset $photoset, $noSlug, $dryRun, $dir)
     {
-        $dirName = $photoset->getTitle();
-        if (!$noSlug) {
-            $dirName = Strings::webalize($dirName);
-        }
+		$dirName = $this->dirnameCreator->create($photoset, $dir, $noSlug);
         if (!is_dir($dirName) && !$dryRun) {
             \Nette\Utils\FileSystem::createDir($dirName);
         }
