@@ -19,6 +19,10 @@ Use ```--help``` to get info about commands:
 
 ```flickr_downloadr photoset:list --help```
 
+You don't have to write full command, it's enough if the prefix match one command. 
+```flickr_downloadr photoset:download```, ```flickr_downloadr photoset:d``` or 
+```flickr_downloadr p:d``` are all the same.
+
 ### Authorize
 At first, you have to allow access to your photos for this app:
 
