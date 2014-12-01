@@ -26,7 +26,16 @@ At first, you have to allow access to your photos for this app:
 
 There is a [step by step tutorial with screenshots](https://github.com/michalsanger/cli-flickr-downloadr/wiki/Authorization)
 
-## Screenshots
+### Photosets list
+Get a list of your albums:
+
+```flickr_downloadr photoset:list```
+
 ![List photosets](https://farm8.staticflickr.com/7548/15685714469_0993a160dd_o.png)
+
+### Download a photoset
+Use the photoset ID as argument for ```photoset:download``` command:
+
+```flickr_downloadr photoset:download 72157647129250803```
 
 ![Download photoset](https://farm8.staticflickr.com/7474/15684400790_fc011fb7bb_o.png)
