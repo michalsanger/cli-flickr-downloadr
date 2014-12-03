@@ -4,19 +4,19 @@ namespace FlickrDownloadr\Photo;
 
 /**
  * @method string getId()
- * @media string getSecret()
- * @media string getServer()
- * @media int getFarm()
- * @media string getIsprimary()
- * @media int getIsPublic()
- * @media int getIsFriend()
- * @media int getIsFamily()
- * @media string getOriginalsecret()
- * @media string getMedia()
- * @media string getMediaStatus()
- * @media string getUrlO()
- * @media string getHeightO()
- * @media string getWidthO()
+ * @method string getSecret()
+ * @method string getServer()
+ * @method int getFarm()
+ * @method string getIsprimary()
+ * @method int getIsPublic()
+ * @method int getIsFriend()
+ * @method int getIsFamily()
+ * @method string getOriginalsecret()
+ * @method string getMedia()
+ * @method string getMediaStatus()
+ * @method string getUrl()
+ * @method int getHeight()
+ * @method int getWidth()
  */
 class Photo
 {
@@ -24,10 +24,17 @@ class Photo
     private $data;
     
     /**
-     * @param array $data API response data, underscores keys
-     */
-    function __construct(array $data)
+	 * 
+	 * @param array $data API response data, underscores keys
+	 * @param string $url
+	 * @param int $width
+	 * @param int $height
+	 */
+    function __construct(array $data, $url, $width, $height)
     {
+		$data['url'] = $url;
+		$data['width'] = $width;
+		$data['height'] = $height;
         $this->data = $data;
     }
     

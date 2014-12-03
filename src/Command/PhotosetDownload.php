@@ -3,6 +3,7 @@
 namespace FlickrDownloadr\Command;
 
 use FlickrDownloadr\Photo\Photo;
+use FlickrDownloadr\Photo\SizeHelper;
 use FlickrDownloadr\Photoset\Photoset;
 use Nette\Utils\Strings;
 use Symfony\Component\Console\Command\Command;
@@ -13,30 +14,29 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class PhotosetDownload extends Command
 {
-    /**
-     * @var \FlickrDownloadr\Photoset\Repository
-     */
+    /** @var \FlickrDownloadr\Photoset\Repository */
     private $photosetRepository;
 
-    /**
-     * @var \FlickrDownloadr\Photo\Repository
-     */
+    /** @var \FlickrDownloadr\Photo\Repository */
     private $photoRepository;
 	
-	/**
-	 * @var \FlickrDownloadr\Photoset\DirnameCreator
-	 */
+	/** @var \FlickrDownloadr\Photoset\DirnameCreator */
 	private $dirnameCreator;
 	
+	/** @var \FlickrDownloadr\Photo\SizeHelper */
+	private $photoSizeHelper;
+
 	public function __construct(
 		\FlickrDownloadr\Photoset\Repository $photosetRepository, 
 		\FlickrDownloadr\Photo\Repository $photoRepository,
-		\FlickrDownloadr\Photoset\DirnameCreator $dirnameCreator
+		\FlickrDownloadr\Photoset\DirnameCreator $dirnameCreator,
+		\FlickrDownloadr\Photo\SizeHelper $photoSizeHelper
 	)
     {
         $this->photosetRepository = $photosetRepository;
         $this->photoRepository = $photoRepository;
 		$this->dirnameCreator = $dirnameCreator;
+		$this->photoSizeHelper = $photoSizeHelper;
         parent::__construct();
     }
 
@@ -48,8 +48,8 @@ class PhotosetDownload extends Command
             ->addArgument('id', InputArgument::REQUIRED, 'ID of the photoset')
             ->addOption('no-slug', null, InputOption::VALUE_NONE, 'Do not convert filename to safe string')
             ->addOption('dry-run', null, InputOption::VALUE_NONE, 'Do not realy download')
-            ->addOption('dir', null, InputOption::VALUE_OPTIONAL, 'Photoset directory. Supported placeholders: %id%, %title%, %year%, %month%, %day%', '%title%-%id%');
-        ;
+            ->addOption('dir', null, InputOption::VALUE_OPTIONAL, 'Photoset directory. Supported placeholders: %id%, %title%, %year%, %month%, %day%', '%title%-%id%')
+			->addOption('photo-size', 's', InputOption::VALUE_OPTIONAL, 'Name of photo size (original, large, medium, small...)', SizeHelper::NAME_ORIGINAL);
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
@@ -58,11 +58,12 @@ class PhotosetDownload extends Command
         $noSlug = $input->getOption('no-slug');
         $dryRun = $input->getOption('dry-run');
         $dir = $input->getOption('dir');
-        
+		$photoSize = $this->photoSizeHelper->validate($input->getOption('photo-size'));
+
         $photoset = $this->photosetRepository->findOne($id);
         $dirName = $this->managePhotosetDir($photoset, $noSlug, $dryRun, $dir);
         
-        $photos = $this->photoRepository->findAllByPhotosetId($id);
+        $photos = $this->photoRepository->findAllByPhotosetId($id, $photoSize);
         $output->writeln('<info>Number of photos in set: ' . count($photos) . '</info>');
         $i = 1;
         foreach ($photos as $photo) {
@@ -122,11 +123,11 @@ class PhotosetDownload extends Command
      */
     private function downloadPhoto(Photo $photo, $filename, $dirName, $dryRun)
     {
-        $urlOriginal = $photo->getUrlO();
+        $url = $photo->getUrl();
 		if ($dryRun) {
 			return 0;
 		}
-        return file_put_contents($dirName . '/' . $filename, fopen($urlOriginal, 'r'));
+        return file_put_contents($dirName . '/' . $filename, fopen($url, 'r'));
     }
     
     /**

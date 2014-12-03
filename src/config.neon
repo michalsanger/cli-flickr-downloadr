@@ -25,4 +25,5 @@ services:
     - FlickrDownloadr\Photoset\DirnameCreator
     - FlickrDownloadr\Photo\Repository
     - FlickrDownloadr\Photo\SizeHelper
+    - FlickrDownloadr\Photo\Mapper
     - FlickrDownloadr\Oauth\ClientFactory(%oauth.baseUrl%, %oauth.key%, %oauth.secret%)
