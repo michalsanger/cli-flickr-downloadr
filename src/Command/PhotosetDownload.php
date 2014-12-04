@@ -49,7 +49,8 @@ class PhotosetDownload extends Command
             ->addOption('no-slug', null, InputOption::VALUE_NONE, 'Do not convert filename to safe string')
             ->addOption('dry-run', null, InputOption::VALUE_NONE, 'Do not realy download')
             ->addOption('dir', null, InputOption::VALUE_OPTIONAL, 'Photoset directory. Supported placeholders: %id%, %title%, %year%, %month%, %day%', '%title%-%id%')
-			->addOption('photo-size', 's', InputOption::VALUE_OPTIONAL, 'Name of photo size (original, large, medium, small...)', SizeHelper::NAME_ORIGINAL);
+			->addOption('photo-size', 's', InputOption::VALUE_OPTIONAL, 'Name of photo size (original, large, medium, small...)', SizeHelper::NAME_ORIGINAL)
+			->addOption('clean-dir', null, InputOption::VALUE_NONE, 'Erase directory if exists');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
@@ -59,9 +60,10 @@ class PhotosetDownload extends Command
         $dryRun = $input->getOption('dry-run');
         $dir = $input->getOption('dir');
 		$photoSize = $this->photoSizeHelper->validate($input->getOption('photo-size'));
+		$cleanDir = $input->getOption('clean-dir');
 
         $photoset = $this->photosetRepository->findOne($id);
-        $dirName = $this->managePhotosetDir($photoset, $noSlug, $dryRun, $dir);
+        $dirName = $this->managePhotosetDir($photoset, $noSlug, $dryRun, $dir, $cleanDir);
         
         $photos = $this->photoRepository->findAllByPhotosetId($id, $photoSize);
         $output->writeln('<info>Number of photos in set: ' . count($photos) . '</info>');
@@ -103,13 +105,17 @@ class PhotosetDownload extends Command
      * @param boolean $noSlug
      * @param boolean $dryRun
      * @param string $dir
+     * @param boolean $cleanDir
      * @return string
      */
-    private function managePhotosetDir(Photoset $photoset, $noSlug, $dryRun, $dir)
+    private function managePhotosetDir(Photoset $photoset, $noSlug, $dryRun, $dir, $cleanDir)
     {
 		$dirName = $this->dirnameCreator->create($photoset, $dir, $noSlug);
-        if (!is_dir($dirName) && !$dryRun) {
-            \Nette\Utils\FileSystem::createDir($dirName);
+		if ($cleanDir && is_dir($dirName) && !$dryRun) {
+			\Nette\Utils\FileSystem::delete($dirName);
+		}
+		if (!is_dir($dirName) && !$dryRun) {
+			\Nette\Utils\FileSystem::createDir($dirName);
         }
         return $dirName;
     }
