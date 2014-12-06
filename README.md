@@ -44,3 +44,5 @@ Use the photoset ID as argument for ```photoset:download``` command:
 ```flickr_downloadr photoset:download 72157647129250803```
 
 ![Download photoset](https://farm8.staticflickr.com/7474/15684400790_fc011fb7bb_o.png)
+
+[Read the documentation](https://github.com/michalsanger/cli-flickr-downloadr/wiki/Photoset-download) about this command.
