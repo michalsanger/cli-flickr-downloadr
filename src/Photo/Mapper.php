@@ -22,6 +22,7 @@ class Mapper
 		$url = $data['url_' . $code];
 		$width = $data['width_' . $code];
 		$height = $data['height_' . $code];
-		return new Photo($data, $url, $width, $height);
+		$date = \Nette\Utils\DateTime::from($data['datetaken']);
+		return new Photo($data, $url, $width, $height, $date);
 	}
 }

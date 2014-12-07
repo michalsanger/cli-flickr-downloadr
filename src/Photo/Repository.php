@@ -48,7 +48,7 @@ class Repository
 	
 	private function getExtras($sizeName)
 	{
-		$extras = array('media', 'original_format');
+		$extras = array('media', 'original_format', 'date_taken', 'views');
 		$sizeCode = $this->sizeHelper->getCode($sizeName);
 		if (is_string($sizeCode)) {
 			$extras[] = 'url_' . $sizeCode;

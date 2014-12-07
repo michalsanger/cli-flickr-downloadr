@@ -17,6 +17,8 @@ namespace FlickrDownloadr\Photo;
  * @method string getUrl()
  * @method int getHeight()
  * @method int getWidth()
+ * @method int getViews()
+ * @method \Nette\Utils\DateTime getDate()
  */
 class Photo
 {
@@ -29,12 +31,14 @@ class Photo
 	 * @param string $url
 	 * @param int $width
 	 * @param int $height
+	 * @param \Nette\Utils\DateTime $date
 	 */
-    function __construct(array $data, $url, $width, $height)
+    function __construct(array $data, $url, $width, $height, \Nette\Utils\DateTime $date)
     {
 		$data['url'] = $url;
 		$data['width'] = $width;
 		$data['height'] = $height;
+		$data['date'] = $date;
         $this->data = $data;
     }
     
