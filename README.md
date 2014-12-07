@@ -38,6 +38,8 @@ Get a list of your albums:
 
 ![List photosets](https://farm8.staticflickr.com/7548/15685714469_0993a160dd_o.png)
 
+[Read the documentation](https://github.com/michalsanger/cli-flickr-downloadr/wiki/Photosets-list) about photosets list.
+
 ### Download a photoset
 Use the photoset ID as argument for ```photoset:download``` command:
 
