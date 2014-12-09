@@ -15,6 +15,7 @@ $data = array (
 	"ispublic" => 1,
 	"isfriend" => 0,
 	"isfamily" => 0,
+	"datetaken" => "2014-11-28 23:32:31",
 	"originalsecret" => "a4a22cd1dc",
 	"originalformat" => "png",
 	"media" => "photo",
@@ -26,8 +27,9 @@ $data = array (
 $url = 'photo URL';
 $width = 800;
 $height = 600;
+$date = \Nette\Utils\DateTime::from($data['datetaken']);
 
-$photo = new Photo($data, $url, $width, $height);
+$photo = new Photo($data, $url, $width, $height, $date);
 
 Assert::equal($url, $photo->getUrl());
 Assert::equal($width, $photo->getWidth());
