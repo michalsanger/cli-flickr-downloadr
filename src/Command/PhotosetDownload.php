@@ -118,6 +118,7 @@ class PhotosetDownload extends Command
 		if ($dryRun) {
 			return 0;
 		}
+		\Nette\Utils\FileSystem::createDir($dirName . '/' . dirname($filename));
         return file_put_contents($dirName . '/' . $filename, fopen($url, 'r'));
     }
     
