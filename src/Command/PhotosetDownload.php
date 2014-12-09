@@ -26,17 +26,22 @@ class PhotosetDownload extends Command
 	/** @var \FlickrDownloadr\Photo\SizeHelper */
 	private $photoSizeHelper;
 
+	/** @var \FlickrDownloadr\Photo\FilenameCreator */
+	private $photoFilenameCreator;
+
 	public function __construct(
 		\FlickrDownloadr\Photoset\Repository $photosetRepository, 
 		\FlickrDownloadr\Photo\Repository $photoRepository,
 		\FlickrDownloadr\Photoset\DirnameCreator $dirnameCreator,
-		\FlickrDownloadr\Photo\SizeHelper $photoSizeHelper
+		\FlickrDownloadr\Photo\SizeHelper $photoSizeHelper,
+		\FlickrDownloadr\Photo\FilenameCreator $photoFilenameCreator
 	)
     {
         $this->photosetRepository = $photosetRepository;
         $this->photoRepository = $photoRepository;
 		$this->dirnameCreator = $dirnameCreator;
 		$this->photoSizeHelper = $photoSizeHelper;
+		$this->photoFilenameCreator = $photoFilenameCreator;
         parent::__construct();
     }
 
@@ -48,9 +53,10 @@ class PhotosetDownload extends Command
             ->addArgument('id', InputArgument::REQUIRED, 'ID of the photoset')
             ->addOption('no-slug', null, InputOption::VALUE_NONE, 'Do not convert filename to safe string')
             ->addOption('dry-run', null, InputOption::VALUE_NONE, 'Do not realy download')
-            ->addOption('dir', null, InputOption::VALUE_OPTIONAL, 'Photoset directory. Supported placeholders: %id%, %title%, %year%, %month%, %day%', '%title%-%id%')
+            ->addOption('dir', null, InputOption::VALUE_OPTIONAL, 'Photoset directory. See the docs for supported placeholders', '%title%-%id%')
 			->addOption('photo-size', 's', InputOption::VALUE_OPTIONAL, 'Name of photo size (original, large, medium, small...)', SizeHelper::NAME_ORIGINAL)
-			->addOption('clean-dir', null, InputOption::VALUE_NONE, 'Erase directory if exists');
+			->addOption('clean-dir', null, InputOption::VALUE_NONE, 'Erase directory if exists')
+			->addOption('photo-name', null, InputOption::VALUE_OPTIONAL, 'Photo filename template. See the docs for supported placeholders', '%order%-%title%-%id%');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
@@ -61,6 +67,7 @@ class PhotosetDownload extends Command
         $dir = $input->getOption('dir');
 		$photoSize = $this->photoSizeHelper->validate($input->getOption('photo-size'));
 		$cleanDir = $input->getOption('clean-dir');
+		$photoFilename = $input->getOption('photo-name');
 
         $photoset = $this->photosetRepository->findOne($id);
         $dirName = $this->managePhotosetDir($photoset, $noSlug, $dryRun, $dir, $cleanDir);
@@ -69,35 +76,13 @@ class PhotosetDownload extends Command
         $output->writeln('<info>Number of photos in set: ' . count($photos) . '</info>');
         $i = 1;
         foreach ($photos as $photo) {
-            $filename = $this->getPhotoFilename($photo, $i, count($photos), $noSlug);
+            $filename = $this->photoFilenameCreator->create($photo, $i, count($photos), $photoFilename, $photoSize, $noSlug);
             $output->write($filename . ' ');
             $size = $this->downloadPhoto($photo, $filename, $dirName, $dryRun);
             $result = $this->getDownloadResult($size);
             $output->writeln($result);
             $i++;
         }
-    }
-    
-    /**
-     * @param Photo $photo
-     * @param int $listOrder
-     * @param int $photosCount
-     * @param boolean $noSlug
-     * @return string
-     */
-    private function getPhotoFilename(Photo $photo, $listOrder, $photosCount, $noSlug)
-    {
-		$padLength = strlen((string)$photosCount);
-        $pos = str_pad($listOrder, $padLength, '0', STR_PAD_LEFT);
-        $title = $photo->getTitle();
-        $id = $photo->getId();
-        $extension = $photo->getOriginalFormat();
-        
-        $filename = $pos . '-' . $title . '-' . $id;
-        if (!$noSlug) {
-            $filename = Strings::webalize($filename);
-        }
-        return $filename . '.' . $extension;
     }
     
     /**
