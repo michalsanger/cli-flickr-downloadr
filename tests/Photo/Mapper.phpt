@@ -16,6 +16,7 @@ $data = array (
 	"ispublic" => 1,
 	"isfriend" => 0,
 	"isfamily" => 0,
+	"datetaken" => "2014-11-28 23:32:31",
 	"originalsecret" => "a4a22cd1dc",
 	"originalformat" => "png",
 	"media" => "photo",
