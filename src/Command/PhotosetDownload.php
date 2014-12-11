@@ -29,6 +29,9 @@ class PhotosetDownload extends Command
 	/** @var \FlickrDownloadr\Photo\FilenameCreator */
 	private $photoFilenameCreator;
 
+	/** @var \Symfony\Component\Console\Output\Output */
+	private $output;
+	
 	public function __construct(
 		\FlickrDownloadr\Photoset\Repository $photosetRepository, 
 		\FlickrDownloadr\Photo\Repository $photoRepository,
@@ -61,6 +64,7 @@ class PhotosetDownload extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+		$this->output = $output;
         $id = $input->getArgument('id');
         $noSlug = $input->getOption('no-slug');
         $dryRun = $input->getOption('dry-run');
@@ -114,12 +118,35 @@ class PhotosetDownload extends Command
      */
     private function downloadPhoto(Photo $photo, $filename, $dirName, $dryRun)
     {
+		// TODO: refactor into Photo\Downloader
         $url = $photo->getUrl();
 		if ($dryRun) {
 			return 0;
 		}
 		\Nette\Utils\FileSystem::createDir($dirName . '/' . dirname($filename));
-        return file_put_contents($dirName . '/' . $filename, fopen($url, 'r'));
+		$output = $this->output;
+		$progress = null;
+		$streamNotificationCallback = function($notification_code, $severity, $message, $message_code, $bytes_transferred, $bytes_max) use (&$progress, $output)
+		{
+			switch($notification_code) {
+
+				case STREAM_NOTIFY_FILE_SIZE_IS:
+					$progress = new \Symfony\Component\Console\Helper\ProgressBar($output, $bytes_max);
+					$progress->start();
+					break;
+
+				case STREAM_NOTIFY_PROGRESS:
+					$progress->setCurrent($bytes_transferred);
+					break;
+			}
+		};
+		$ctx = stream_context_create();
+		stream_context_set_params($ctx, array("notification" => $streamNotificationCallback));
+
+        $bytes = file_put_contents($dirName . '/' . $filename, fopen($url, 'r', FALSE, $ctx));
+		$progress->clear();
+		$progress->finish();
+        return $bytes;
     }
     
     /**
