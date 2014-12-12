@@ -81,10 +81,10 @@ class PhotosetDownload extends Command
         $i = 1;
         foreach ($photos as $photo) {
             $filename = $this->photoFilenameCreator->create($photo, $i, count($photos), $photoFilename, $photoSize, $noSlug);
-            $output->write($filename . ' ');
-            $size = $this->downloadPhoto($photo, $filename, $dirName, $dryRun);
-            $result = $this->getDownloadResult($size);
-            $output->writeln($result);
+            //$output->write($filename . ' ');
+            $this->downloadPhoto($photo, $filename, $dirName, $dryRun);
+            //$result = $this->getDownloadResult($size);
+            //$output->writeln($result);
             $i++;
         }
     }
@@ -118,35 +118,8 @@ class PhotosetDownload extends Command
      */
     private function downloadPhoto(Photo $photo, $filename, $dirName, $dryRun)
     {
-		// TODO: refactor into Photo\Downloader
-        $url = $photo->getUrl();
-		if ($dryRun) {
-			return 0;
-		}
-		\Nette\Utils\FileSystem::createDir($dirName . '/' . dirname($filename));
-		$output = $this->output;
-		$progress = null;
-		$streamNotificationCallback = function($notification_code, $severity, $message, $message_code, $bytes_transferred, $bytes_max) use (&$progress, $output)
-		{
-			switch($notification_code) {
-
-				case STREAM_NOTIFY_FILE_SIZE_IS:
-					$progress = new \Symfony\Component\Console\Helper\ProgressBar($output, $bytes_max);
-					$progress->start();
-					break;
-
-				case STREAM_NOTIFY_PROGRESS:
-					$progress->setCurrent($bytes_transferred);
-					break;
-			}
-		};
-		$ctx = stream_context_create();
-		stream_context_set_params($ctx, array("notification" => $streamNotificationCallback));
-
-        $bytes = file_put_contents($dirName . '/' . $filename, fopen($url, 'r', FALSE, $ctx));
-		$progress->clear();
-		$progress->finish();
-        return $bytes;
+		$downloader = new \FlickrDownloadr\Photo\Downloader($this->output, $dryRun);
+		return $downloader->download($photo, $filename, $dirName);
     }
     
     /**
