@@ -5,7 +5,6 @@ namespace FlickrDownloadr\Command;
 use FlickrDownloadr\Photo\Photo;
 use FlickrDownloadr\Photo\SizeHelper;
 use FlickrDownloadr\Photoset\Photoset;
-use Nette\Utils\Strings;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -29,12 +28,19 @@ class PhotosetDownload extends Command
 	/** @var \FlickrDownloadr\Photo\FilenameCreator */
 	private $photoFilenameCreator;
 
+	/** @var \FlickrDownloadr\Photo\DownloaderFactory */
+	private $downloaderFactory;
+	
+	/** @var \Symfony\Component\Console\Output\Output */
+	private $output;
+	
 	public function __construct(
 		\FlickrDownloadr\Photoset\Repository $photosetRepository, 
 		\FlickrDownloadr\Photo\Repository $photoRepository,
 		\FlickrDownloadr\Photoset\DirnameCreator $dirnameCreator,
 		\FlickrDownloadr\Photo\SizeHelper $photoSizeHelper,
-		\FlickrDownloadr\Photo\FilenameCreator $photoFilenameCreator
+		\FlickrDownloadr\Photo\FilenameCreator $photoFilenameCreator,
+		\FlickrDownloadr\Photo\DownloaderFactory $downloaderFactory
 	)
     {
         $this->photosetRepository = $photosetRepository;
@@ -42,6 +48,7 @@ class PhotosetDownload extends Command
 		$this->dirnameCreator = $dirnameCreator;
 		$this->photoSizeHelper = $photoSizeHelper;
 		$this->photoFilenameCreator = $photoFilenameCreator;
+		$this->downloaderFactory = $downloaderFactory;
         parent::__construct();
     }
 
@@ -61,6 +68,7 @@ class PhotosetDownload extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+		$this->output = $output;
         $id = $input->getArgument('id');
         $noSlug = $input->getOption('no-slug');
         $dryRun = $input->getOption('dry-run');
@@ -73,14 +81,12 @@ class PhotosetDownload extends Command
         $dirName = $this->managePhotosetDir($photoset, $noSlug, $dryRun, $dir, $cleanDir);
         
         $photos = $this->photoRepository->findAllByPhotosetId($id, $photoSize);
-        $output->writeln('<info>Number of photos in set: ' . count($photos) . '</info>');
+        $output->writeln('<info>Number of photos in set: ' . count($photos) . '</info>' . PHP_EOL);
         $i = 1;
+		$downloader = $this->downloaderFactory->create($output, $dryRun);
         foreach ($photos as $photo) {
             $filename = $this->photoFilenameCreator->create($photo, $i, count($photos), $photoFilename, $photoSize, $noSlug);
-            $output->write($filename . ' ');
-            $size = $this->downloadPhoto($photo, $filename, $dirName, $dryRun);
-            $result = $this->getDownloadResult($size);
-            $output->writeln($result);
+			$downloader->download($photo, $filename, $dirName);
             $i++;
         }
     }
@@ -103,54 +109,5 @@ class PhotosetDownload extends Command
 			\Nette\Utils\FileSystem::createDir($dirName);
         }
         return $dirName;
-    }
-
-    /**
-     * @param Photo $photo
-     * @param string $filename
-     * @param string $dirName
-     * @param boolean $dryRun
-     * @return int Number of bytes that were written to the file, or FALSE on failure
-     */
-    private function downloadPhoto(Photo $photo, $filename, $dirName, $dryRun)
-    {
-        $url = $photo->getUrl();
-		if ($dryRun) {
-			return 0;
-		}
-		\Nette\Utils\FileSystem::createDir($dirName . '/' . dirname($filename));
-        return file_put_contents($dirName . '/' . $filename, fopen($url, 'r'));
-    }
-    
-    /**
-     * Converts to human readable file size.
-     * @param  int
-     * @param  int
-     * @return string
-     */
-    private function formatFilesize($bytes, $precision = 2)
-    {
-        $units = array('B', 'kB', 'MB', 'GB', 'TB', 'PB');
-        foreach ($units as $unit) {
-            if (abs($bytes) < 1024 || $unit === end($units)) {
-                break;
-            }
-            $bytes = $bytes / 1024;
-        }
-        return round($bytes, $precision) . ' ' . $unit;
-    }
-    
-    /**
-     * @param int $downloadedSize
-     * @return string
-     */
-    private function getDownloadResult($downloadedSize)
-    {
-        if ($downloadedSize === FALSE) {
-            $result = '<error>Error!</error>';
-        } else {
-            $result = '<comment>(' . $this->formatFilesize($downloadedSize) . ')</comment>';
-        }
-        return $result;
     }
 }

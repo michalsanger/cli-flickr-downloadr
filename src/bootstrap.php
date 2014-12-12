@@ -12,6 +12,8 @@ require_once __DIR__ . '/Photo/Photo.php';
 require_once __DIR__ . '/Photo/Repository.php';
 require_once __DIR__ . '/Photo/Mapper.php';
 require_once __DIR__ . '/Photo/FilenameCreator.php';
+require_once __DIR__ . '/Photo/Downloader.php';
+require_once __DIR__ . '/Photo/DownloaderFactory.php';
 require_once __DIR__ . '/Oauth/ClientFactory.php';
 require_once __DIR__ . '/Photoset/DirnameCreator.php';
 require_once __DIR__ . '/Photo/SizeHelper.php';
