@@ -69,13 +69,7 @@ class PhotosetDownload extends Command
     protected function execute(InputInterface $input, OutputInterface $output)
     {
 		$this->output = $output;
-        $id = $input->getArgument('id');
-        $noSlug = $input->getOption('no-slug');
-        $dryRun = $input->getOption('dry-run');
-        $dir = $input->getOption('dir');
-		$photoSize = $this->photoSizeHelper->validate($input->getOption('photo-size'));
-		$cleanDir = $input->getOption('clean-dir');
-		$photoFilename = $input->getOption('photo-name');
+		list($id, $noSlug, $dryRun, $dir, $photoSize, $cleanDir, $photoFilename) = $this->getInputParams($input);
 
         $photoset = $this->photosetRepository->findOne($id);
         $dirName = $this->managePhotosetDir($photoset, $noSlug, $dryRun, $dir, $cleanDir);
@@ -110,4 +104,20 @@ class PhotosetDownload extends Command
         }
         return $dirName;
     }
+	
+	/**
+	 * @param InputInterface $input
+	 * @return array
+	 */
+	private function getInputParams(InputInterface $input)
+	{
+        $id = $input->getArgument('id');
+        $noSlug = $input->getOption('no-slug');
+        $dryRun = $input->getOption('dry-run');
+        $dir = $input->getOption('dir');
+		$photoSize = $this->photoSizeHelper->validate($input->getOption('photo-size'));
+		$cleanDir = $input->getOption('clean-dir');
+		$photoFilename = $input->getOption('photo-name');
+		return array($id, $noSlug, $dryRun, $dir, $photoSize, $cleanDir, $photoFilename);
+	}
 }
