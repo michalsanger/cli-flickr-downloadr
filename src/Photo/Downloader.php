@@ -3,7 +3,7 @@
 namespace FlickrDownloadr\Photo;
 
 use \Symfony\Component\Console\Helper\ProgressBar;
-use Symfony\Component\Console\Output\OutputInterface;
+use \Symfony\Component\Console\Output\OutputInterface;
 
 class Downloader
 {
@@ -12,11 +12,15 @@ class Downloader
 	
 	/** @var boolean */
 	private $dryRun;
+
+	/** @var \Symfony\Component\Console\Helper\ProgressBar */
+	private $progress;
 	
 	public function __construct(OutputInterface $output, $dryRun)
 	{
 		$this->output = $output;
 		$this->dryRun = $dryRun;
+		$this->progress = new ProgressBar($output);
 	}
 	
 	/**
@@ -34,40 +38,43 @@ class Downloader
 		\Nette\Utils\FileSystem::createDir($dirname . '/' . dirname($filename));
 		
 		$this->setupProgressBar();
-		$output = $this->output;
-		$progress = null;
-		$streamNotificationCallback = function($notification_code, $severity, $message, $messageCode, $bytesTransferred, $bytesMax) use (&$progress, $output, $filename)
+		$ctx = stream_context_create();
+		stream_context_set_params($ctx, array("notification" => $this->getNotificationCallback($filename)));
+
+        $bytes = file_put_contents($dirname . '/' . $filename, fopen($url, 'r', FALSE, $ctx));
+		if ($bytes === FALSE) {
+			$this->progress->setMessage('<error>Error!</error>', 'final_report');
+		} else {
+			list($time, $size, $speed) = $this->getFinalStats($this->progress->getMaxSteps(), $this->progress->getStartTime());
+			$this->progress->setMessage('<comment>[' . $size . ' in ' . $time . ' (' . $speed . ')]</comment>', 'final_report');
+			$this->progress->setFormat('%message% %final_report%' . "\n");
+		}
+		$this->progress->finish();
+		$this->output->writeln('');
+        return $bytes;
+	}
+	
+	private function getNotificationCallback($filename)
+	{
+		$notificationCallback = function($notification_code, $severity, $message, $messageCode, $bytesTransferred, $bytesMax) use ($filename)
 		{
 			switch($notification_code) {
 
 				case STREAM_NOTIFY_FILE_SIZE_IS:
-					$progress = new ProgressBar($output, $bytesMax);
-					$progress->setFormat('%message% %final_report%' . "\n" . '%percent:3s%% of %photo_size% [%bar%] %downloaded_bytes% eta %estimated:6s%');
-					$progress->setMessage($filename);
-					$progress->setMessage('', 'final_report');
-					$progress->start();
+					$this->progress = new ProgressBar($this->output, $bytesMax);
+					$this->progress->setFormat('%message% %final_report%' . "\n" . '%percent:3s%% of %photo_size% [%bar%] %downloaded_bytes% eta %estimated:6s%');
+					$this->progress->setMessage($filename);
+					$this->progress->setMessage('', 'final_report');
+					$this->progress->start();
 
 					break;
 
 				case STREAM_NOTIFY_PROGRESS:
-					$progress->setCurrent($bytesTransferred);
+					$this->progress->setCurrent($bytesTransferred);
 					break;
 			}
 		};
-		$ctx = stream_context_create();
-		stream_context_set_params($ctx, array("notification" => $streamNotificationCallback));
-
-        $bytes = file_put_contents($dirname . '/' . $filename, fopen($url, 'r', FALSE, $ctx));
-		if ($bytes === FALSE) {
-			$progress->setMessage('<error>Error!</error>', 'final_report');
-		} else {
-			list($time, $size, $speed) = $this->getFinalStats($progress->getMaxSteps(), $progress->getStartTime());
-			$progress->setMessage('<comment>[' . $size . ' in ' . $time . ' (' . $speed . ')]</comment>', 'final_report');
-			$progress->setFormat('%message% %final_report%' . "\n");
-		}
-		$progress->finish();
-		$this->output->writeln('');
-        return $bytes;
+		return $notificationCallback;
 	}
 	
 	private function setupProgressBar()
