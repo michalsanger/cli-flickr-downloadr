@@ -2,15 +2,18 @@
 
 namespace FlickrDownloadr\Photo;
 
+use \Symfony\Component\Console\Helper\ProgressBar;
+use Symfony\Component\Console\Output\OutputInterface;
+
 class Downloader
 {
-	/** @var \Symfony\Component\Console\Output\Output */
+	/** @var \Symfony\Component\Console\Output\OutputInterface */
 	private $output;
 	
 	/** @var boolean */
 	private $dryRun;
 	
-	public function __construct(\Symfony\Component\Console\Output\Output $output, $dryRun)
+	public function __construct(OutputInterface $output, $dryRun)
 	{
 		$this->output = $output;
 		$this->dryRun = $dryRun;
@@ -38,7 +41,7 @@ class Downloader
 			switch($notification_code) {
 
 				case STREAM_NOTIFY_FILE_SIZE_IS:
-					$progress = new \Symfony\Component\Console\Helper\ProgressBar($output, $bytesMax);
+					$progress = new ProgressBar($output, $bytesMax);
 					$progress->setFormat('%message% %final_report%' . "\n" . '%percent:3s%% of %photo_size% [%bar%] %downloaded_bytes% eta %estimated:6s%');
 					$progress->setMessage($filename);
 					$progress->setMessage('', 'final_report');
@@ -69,15 +72,15 @@ class Downloader
 	
 	private function setupProgressBar()
 	{
-		\Symfony\Component\Console\Helper\ProgressBar::setPlaceholderFormatterDefinition(
+		ProgressBar::setPlaceholderFormatterDefinition(
 			'photo_size',
-			function (\Symfony\Component\Console\Helper\ProgressBar $bar) {
+			function (ProgressBar $bar) {
 				return \Latte\Runtime\Filters::bytes($bar->getMaxSteps());
 			}
 		);
-		\Symfony\Component\Console\Helper\ProgressBar::setPlaceholderFormatterDefinition(
+		ProgressBar::setPlaceholderFormatterDefinition(
 			'downloaded_bytes',
-			function (\Symfony\Component\Console\Helper\ProgressBar $bar) {
+			function (ProgressBar $bar) {
 				return \Latte\Runtime\Filters::bytes($bar->getStep());
 			}
 		);

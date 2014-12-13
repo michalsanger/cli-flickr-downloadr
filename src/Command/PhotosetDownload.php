@@ -2,7 +2,6 @@
 
 namespace FlickrDownloadr\Command;
 
-use FlickrDownloadr\Photo\Photo;
 use FlickrDownloadr\Photo\SizeHelper;
 use FlickrDownloadr\Photoset\Photoset;
 use Symfony\Component\Console\Command\Command;
