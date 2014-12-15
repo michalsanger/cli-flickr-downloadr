@@ -1,5 +1,5 @@
 parameters:
-    version: "v0.6.0"
+    version: "v0.7.0"
     oauth:
         baseUrl: "https://www.flickr.com/services/oauth/"
         key: "3365341effaf533f4fe95f6629a2c9a8"

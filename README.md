@@ -6,7 +6,7 @@ Backup your Flickr with this console app
 
 [Get the latest package](https://github.com/michalsanger/cli-flickr-downloadr/releases) and save it into the ```$PATH```. PHP 5.3.0 or later is required.
 
-    wget https://github.com/michalsanger/cli-flickr-downloadr/releases/download/v0.6.0/flickr_downloadr.phar -O flickr_downloadr.phar
+    wget https://github.com/michalsanger/cli-flickr-downloadr/releases/download/v0.7.0/flickr_downloadr.phar -O flickr_downloadr.phar
     chmod u+x flickr_downloadr.phar
     mv flickr_downloadr.phar /usr/local/bin/flickr_downloadr
 
