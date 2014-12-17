@@ -29,3 +29,4 @@ services:
     - FlickrDownloadr\Photo\FilenameCreator
     - FlickrDownloadr\Photo\DownloaderFactory
     - FlickrDownloadr\Oauth\ClientFactory(%oauth.baseUrl%, %oauth.key%, %oauth.secret%)
+    - FlickrDownloadr\Tool\TimeFormater

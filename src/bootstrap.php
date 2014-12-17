@@ -17,3 +17,4 @@ require_once __DIR__ . '/Photo/DownloaderFactory.php';
 require_once __DIR__ . '/Oauth/ClientFactory.php';
 require_once __DIR__ . '/Photoset/DirnameCreator.php';
 require_once __DIR__ . '/Photo/SizeHelper.php';
+require_once __DIR__ . '/Tool/TimeFormater.php';

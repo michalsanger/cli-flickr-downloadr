@@ -4,11 +4,15 @@ namespace FlickrDownloadr\Photo;
 
 use \Symfony\Component\Console\Helper\ProgressBar;
 use \Symfony\Component\Console\Output\OutputInterface;
+use \FlickrDownloadr\Tool\TimeFormater;
 
 class Downloader
 {
 	/** @var \Symfony\Component\Console\Output\OutputInterface */
 	private $output;
+	
+	/** @var \FlickrDownloadr\Tool\TimeFormater */
+	private $timeFormater;
 	
 	/** @var boolean */
 	private $dryRun;
@@ -16,9 +20,10 @@ class Downloader
 	/** @var \Symfony\Component\Console\Helper\ProgressBar */
 	private $progress;
 	
-	public function __construct(OutputInterface $output, $dryRun)
+	public function __construct(OutputInterface $output, TimeFormater $timeFormater, $dryRun)
 	{
 		$this->output = $output;
+		$this->timeFormater = $timeFormater;
 		$this->dryRun = $dryRun;
 		$this->progress = new ProgressBar($output);
 	}
@@ -104,20 +109,7 @@ class Downloader
 	{
 		$size = \Latte\Runtime\Filters::bytes($photoSize);
 		$seconds = max(array(time() - $startTime, 1));
-		$minutes = min(array(59, floor($seconds/60)));
-		$hours = floor($seconds/3600);
-		
-		$times = array();
-		if ($hours > 0) {
-			$times[] = $hours . 'h';
-		}
-		if ($minutes > 0) {
-			$times[] = $minutes . 'm';
-		}
-		if (($seconds%60) > 0) {
-			$times[] = $seconds%60 . 's';
-		}
-		$time = implode(' ', $times);
+		$time = $this->timeFormater->format($seconds);
 
 		$speed = \Latte\Runtime\Filters::bytes($photoSize / $seconds) . '/s';
 		return array($time, $size, $speed);
