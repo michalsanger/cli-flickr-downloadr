@@ -10,8 +10,11 @@ class TimeFormater
 	 */
 	public function format($time)
 	{
+		if ($time === 0) {
+			return '0s';
+		}
 		$seconds = $time%60;
-		$minutes = min(array(59, floor($time/60)));
+		$minutes = floor(($time%3600)/60);
 		$hours = floor($time/3600);
 		
 		$times = array();
