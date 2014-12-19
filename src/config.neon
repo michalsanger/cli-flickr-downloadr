@@ -30,3 +30,5 @@ services:
     - FlickrDownloadr\Photo\DownloaderFactory
     - FlickrDownloadr\Oauth\ClientFactory(%oauth.baseUrl%, %oauth.key%, %oauth.secret%)
     - FlickrDownloadr\Tool\TimeFormater
+    - FlickrDownloadr\Tool\SpeedFormater
+    - FlickrDownloadr\Tool\FilesizeFormater

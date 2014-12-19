@@ -13,9 +13,9 @@ class TimeFormater
 		if ($time === 0) {
 			return '0s';
 		}
-		$seconds = $time%60;
 		$minutes = floor(($time%3600)/60);
 		$hours = floor($time/3600);
+		$seconds = round($time - 60*$minutes - 3600*$hours, 1);
 		
 		$times = array();
 		if ($hours > 0) {

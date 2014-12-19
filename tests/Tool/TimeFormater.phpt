@@ -8,6 +8,9 @@ use FlickrDownloadr\Tool\TimeFormater;
 $formater = new TimeFormater();
 
 Assert::equal('1s', $formater->format(1));
+Assert::equal('1.3s', $formater->format(1.33));
+Assert::equal('1.7s', $formater->format(1.685));
+Assert::equal('0.5s', $formater->format(0.5));
 Assert::equal('44s', $formater->format(44));
 Assert::equal('1m', $formater->format(60));
 Assert::equal('8m', $formater->format(480));

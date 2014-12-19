@@ -9,9 +9,21 @@ class DownloaderFactory
 	/** @var \FlickrDownloadr\Tool\TimeFormater */
 	private $timeFormater;
 
-	function __construct(\FlickrDownloadr\Tool\TimeFormater $timeFormater)
+	/** @var \FlickrDownloadr\Tool\SpeedFormater */
+	private $speedFormater;
+
+	/** @var \FlickrDownloadr\Tool\FilesizeFormater */
+	private $filesizeFormater;
+
+	function __construct(
+		\FlickrDownloadr\Tool\TimeFormater $timeFormater,
+		\FlickrDownloadr\Tool\SpeedFormater $speedFormater,
+		\FlickrDownloadr\Tool\FilesizeFormater $filesizeFormater
+	)
 	{
 		$this->timeFormater = $timeFormater;
+		$this->speedFormater = $speedFormater;
+		$this->filesizeFormater = $filesizeFormater;
 	}
 
 	/**
@@ -21,6 +33,11 @@ class DownloaderFactory
 	 */
 	public function create(OutputInterface $output, $dryRun)
 	{
-		return new Downloader($output, $this->timeFormater, $dryRun);
+		return new Downloader(
+			$output, 
+			$this->timeFormater, 
+			$this->speedFormater, 
+			$this->filesizeFormater, 
+			$dryRun);
 	}
 }

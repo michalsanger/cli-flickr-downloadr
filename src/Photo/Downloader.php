@@ -5,6 +5,8 @@ namespace FlickrDownloadr\Photo;
 use \Symfony\Component\Console\Helper\ProgressBar;
 use \Symfony\Component\Console\Output\OutputInterface;
 use \FlickrDownloadr\Tool\TimeFormater;
+use \FlickrDownloadr\Tool\SpeedFormater;
+use \FlickrDownloadr\Tool\FilesizeFormater;
 
 class Downloader
 {
@@ -13,21 +15,35 @@ class Downloader
 	
 	/** @var \FlickrDownloadr\Tool\TimeFormater */
 	private $timeFormater;
-	
+
+	/** @var \FlickrDownloadr\Tool\SpeedFormater */
+	private $speedFormater;
+
+	/** @var \FlickrDownloadr\Tool\FilesizeFormater */
+	private $filesizeFormater;
+
 	/** @var boolean */
 	private $dryRun;
 
 	/** @var \Symfony\Component\Console\Helper\ProgressBar */
 	private $progress;
-	
-	public function __construct(OutputInterface $output, TimeFormater $timeFormater, $dryRun)
+
+	public function __construct(
+		OutputInterface $output,
+		TimeFormater $timeFormater,
+		SpeedFormater $speedFormater,
+		FilesizeFormater $filesizeFormater,
+		$dryRun
+	)
 	{
 		$this->output = $output;
 		$this->timeFormater = $timeFormater;
+		$this->speedFormater = $speedFormater;
+		$this->filesizeFormater = $filesizeFormater;
 		$this->dryRun = $dryRun;
 		$this->progress = new ProgressBar($output);
 	}
-	
+
 	/**
 	 * @param \FlickrDownloadr\Photo\Photo $photo
 	 * @param string $filename
@@ -87,13 +103,13 @@ class Downloader
 		ProgressBar::setPlaceholderFormatterDefinition(
 			'photo_size',
 			function (ProgressBar $bar) {
-				return \Latte\Runtime\Filters::bytes($bar->getMaxSteps());
+				return $this->filesizeFormater->format($bar->getMaxSteps());
 			}
 		);
 		ProgressBar::setPlaceholderFormatterDefinition(
 			'downloaded_bytes',
 			function (ProgressBar $bar) {
-				return \Latte\Runtime\Filters::bytes($bar->getStep());
+				return $this->filesizeFormater->format($bar->getStep());
 			}
 		);
 	}
@@ -107,11 +123,10 @@ class Downloader
 	 */
 	private function getFinalStats($photoSize, $startTime)
 	{
-		$size = \Latte\Runtime\Filters::bytes($photoSize);
-		$seconds = max(array(time() - $startTime, 1));
-		$time = $this->timeFormater->format($seconds);
-
-		$speed = \Latte\Runtime\Filters::bytes($photoSize / $seconds) . '/s';
+		$size = $this->filesizeFormater->format($photoSize);
+		$duration = max(array(microtime(TRUE) - $startTime, 0.001));
+		$time = $this->timeFormater->format($duration);
+		$speed = $this->speedFormater->format($photoSize, $duration);
 		return array($time, $size, $speed);
 	}
 		
