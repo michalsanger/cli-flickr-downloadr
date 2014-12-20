@@ -12,4 +12,5 @@ rm ../../src/config.neon.bak
 sed -i.bak "s/download\/.*\/flickr_downloadr\.phar/download\/$1\/flickr_downloadr\.phar/g" ../../README.md
 rm ../../README.md.bak
 
-# TODO: commit and create tag
+git commit -a -m "Bump version $1"
+git tag $1
