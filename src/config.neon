@@ -7,6 +7,9 @@ parameters:
         token: null
         tokenSecret: null
 
+php:
+    date.timezone: UTC
+
 services:
     - FlickrDownloadr\Command\Authorize(%oauth.baseUrl%, %oauth.key%, %oauth.secret%)
     - FlickrDownloadr\Command\PhotosetList
