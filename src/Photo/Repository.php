@@ -6,6 +6,12 @@ use FlickrDownloadr\Photo\SizeHelper;
 
 class Repository
 {
+	/**
+	 * Number of photos to return per page. The maximum allowed value is 500.
+	 * @var int
+	 */
+	private $photosPerPage = 100;
+
     /** @var \FlickrDownloadr\FlickrApi\Client */
     private $flickrApi;
 	
@@ -36,10 +42,18 @@ class Repository
         $params = [
             'photoset_id' => $photosetId, 
             'extras' => $this->getExtras($sizeName),
+            'per_page' => $this->photosPerPage,
         ];
-        $response = $this->flickrApi->call('flickr.photosets.getPhotos', $params);
-        $photosData = $response['photoset']['photo'];
-        $photos = array();
+		$currentPage = 1;
+		$firstPage = $this->getPage($currentPage, $params);
+		$pages = $firstPage['photoset']['pages'];
+		$photosData = $firstPage['photoset']['photo'];
+		while($currentPage < $pages) {
+			$currentPage++;
+			$response = $this->getPage($currentPage, $params);
+			$photosData = array_merge($photosData, $response['photoset']['photo']);
+		}
+
         foreach ($photosData as $photoData) {
             $photos[] = $this->mapper->fromPlainToEntity($photoData, $sizeName);
         }
@@ -55,5 +69,16 @@ class Repository
 		}
 		return implode(',', $extras);
 	}
-		
+
+	/**
+	 * @param type $pageNumber
+	 * @param array $params
+	 * @return array API response with all metadata
+	 */
+	private function getPage($pageNumber, array $params)
+	{
+		$params['page'] = $pageNumber;
+		$response = $this->flickrApi->call('flickr.photosets.getPhotos', $params);
+		return $response;
+	}
 }
