@@ -13,8 +13,7 @@ namespace FlickrDownloadr\Photoset;
  * @method int getPhotos() Photos count
  * @method string getCountViews()
  * @method string getCountComments()
- * @method string getCountPhotos()
- * @method int getCountVideos()
+ * @method int getVideos() Videos count
  * @method int getCanComment()
  * @method string getDateCreate()
  * @method string getDateUpdate()

@@ -74,7 +74,7 @@ class PhotosetDownload extends Command
         $dirName = $this->managePhotosetDir($photoset, $noSlug, $dryRun, $dir, $cleanDir);
         
         $photos = $this->photoRepository->findAllByPhotosetId($id, $photoSize);
-        $output->writeln('<info>Number of photos in set: ' . count($photos) . '</info>' . PHP_EOL);
+        $output->writeln('<info>Number of items in set: ' . count($photos) . '</info>' . PHP_EOL);
         $i = 1;
 		$downloader = $this->downloaderFactory->create($output, $dryRun);
         foreach ($photos as $photo) {

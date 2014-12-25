@@ -46,9 +46,9 @@ class PhotosetList extends Command
         $output->writeln('<info>Number of photosets: ' . count($sets) . '</info>');
 
         $table = new Table($output);
-        $table->setHeaders(array('ID', 'Title', 'Photos'));
+        $table->setHeaders(array('ID', 'Title', 'Items'));
         foreach ($sets as $set) {
-            $table->addRow(array($set->getId(), $set->getTitle(), $set->getPhotos()));
+            $table->addRow(array($set->getId(), $set->getTitle(), $set->getPhotos() + $set->getVideos()));
         }
         $table->render();
     }
