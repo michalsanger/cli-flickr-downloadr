@@ -12,10 +12,13 @@ if (is_readable($userConfig)) {
 }
 $container = $configurator->createContainer();
 
-$application = new Symfony\Component\Console\Application('Flickr Downloadr');
+$configParams = $container->getParameters();
+$version = $configParams['version'];
+$build = $configParams['build'];
+$application = new FlickrDownloadr\Console\Application('Flickr Downloadr', $version, $build);
 $commands = $container->findByType('Symfony\Component\Console\Command\Command');
 foreach ($commands as $commandName) {
     $application->add($container->getService($commandName));
 }
-$application->setVersion($container->getParameters()['version']);
+
 $application->run();

@@ -1,5 +1,6 @@
 <?php
 
+require_once __DIR__ . '/Console/Application.php';
 require_once __DIR__ . '/Command/PhotosetDownload.php';
 require_once __DIR__ . '/Command/PhotosetList.php';
 require_once __DIR__ . '/Command/Authorize.php';
