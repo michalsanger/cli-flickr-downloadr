@@ -3,6 +3,9 @@
 # Install Box2 and put it in the path
 # https://github.com/box-project/box2
 
+# Fix default open files limit
+ulimit -n 10000
+
 # Set current hash as build name into config
 BUILD=`git rev-parse HEAD`
 sed -i.bak "s/build: null/build: \"$BUILD\"/g" ../../src/config.neon
