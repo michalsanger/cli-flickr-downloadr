@@ -23,19 +23,34 @@ class Application extends \Symfony\Component\Console\Application
 	 */
 	public function getLongVersion()
 	{
-		$version = parent::getLongVersion();
+		$banner = $this->getBanner();
 		if (strlen($this->getBuild()) > 0) {
 			$build = sprintf('build <comment>%s</comment>', $this->getBuild());
-			$version .= ' ' . $build;
+			$banner .= "\n" . $build;
 		}
-		return $version;
+		return $banner;
 	}
-	
+
 	/**
 	 * @return string
 	 */
 	public function getBuild()
 	{
 		return $this->build;
+	}
+
+	private function getBanner()
+	{
+		$bannerTpl = <<<str
+ Flickr                 __             __   
+  / _ \___ _    _____  / /__  ___ ____/ /___
+ / // / _ \ |/|/ / _ \/ / _ \/ _ `/ _  / __/
+/____/\___/__,__/_//_/_/\___/\_,_/\_,_/_/ <comment>{version}</comment>
+str;
+		$banner = strtr($bannerTpl, array(
+			'Flickr' => '<info>Flickr</info>',
+			'{version}' => $this->getVersion(),
+		));
+		return $banner;
 	}
 }
